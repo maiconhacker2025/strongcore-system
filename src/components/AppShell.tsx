@@ -1,6 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Users, LayoutDashboard, UserPlus, Heart, Sparkles } from "lucide-react";
+import { Users, LayoutDashboard, UserPlus, Sparkles, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { QuickSearch } from "@/components/QuickSearch";
+import { BackupReminder } from "@/components/BackupReminder";
+import { Button } from "@/components/ui/button";
+import { runFullBackup, daysSinceBackup } from "@/lib/backup";
+import logo from "@/assets/logo-progredir.jpg";
+import { useState } from "react";
 
 const navItems = [
   { to: "/", label: "Painel", icon: LayoutDashboard },
@@ -11,20 +17,20 @@ const navItems = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const [busy, setBusy] = useState(false);
+  const days = daysSinceBackup();
+
+  const doBackup = async () => {
+    setBusy(true);
+    await runFullBackup();
+    setBusy(false);
+  };
 
   return (
     <div className="min-h-screen flex bg-background">
       <aside className="hidden md:flex w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
-        <div className="px-6 py-7 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <div className="size-10 rounded-xl bg-accent/90 flex items-center justify-center">
-              <Heart className="size-5 text-accent-foreground" fill="currentColor" />
-            </div>
-            <div>
-              <div className="font-display font-bold text-lg leading-tight">Beneficiários</div>
-              <div className="text-xs opacity-70">Sistema de gestão</div>
-            </div>
-          </div>
+        <div className="px-6 py-6 border-b border-sidebar-border bg-white/95">
+          <img src={logo} alt="Espaço Progredir — Acreditando na vida" className="h-16 mx-auto object-contain" />
         </div>
 
         <nav className="flex-1 px-3 py-6 space-y-1">
@@ -48,9 +54,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
+
+        <div className="p-3 border-t border-sidebar-border space-y-2">
+          <Button
+            onClick={doBackup}
+            disabled={busy}
+            variant="outline"
+            className="w-full bg-white/10 hover:bg-white/20 border-white/20 text-sidebar-foreground"
+          >
+            <Download className="size-4" /> Backup semanal
+          </Button>
+          <p className="text-[11px] opacity-70 text-center">
+            {days === null ? "Nenhum backup ainda" : days === 0 ? "Backup feito hoje ✓" : `Último backup há ${days} dia(s)`}
+          </p>
+        </div>
       </aside>
 
-      <main className="flex-1 min-w-0">{children}</main>
+      <main className="flex-1 min-w-0 flex flex-col">
+        <div className="border-b bg-background/80 backdrop-blur sticky top-0 z-30 px-4 md:px-10 py-3 flex items-center gap-4">
+          <QuickSearch />
+        </div>
+        <div className="flex-1 min-w-0">{children}</div>
+      </main>
+
+      <BackupReminder />
     </div>
   );
 }
