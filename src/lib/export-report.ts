@@ -19,13 +19,50 @@ function today() {
   return new Date().toLocaleDateString("pt-BR");
 }
 
+const COLUMN_LABELS: Record<string, string> = {
+  codigo: "Código", nome: "Nome", data_nascimento: "Nascimento", genero: "Gênero",
+  classe_risco: "Risco", ativo: "Status", escolaridade: "Escolaridade", turno: "Turno",
+  escola: "Escola", bairro: "Bairro", rua: "Rua", cep: "CEP", estado: "UF",
+  responsavel: "Responsável", nome_mae: "Mãe", nome_pai: "Pai", mora_com: "Mora com",
+  celular: "Celular", whatsapp: "WhatsApp", email: "E-mail",
+  data_ingresso_01: "Ingresso", data_desligamento_01: "Desligamento",
+  renda: "Renda", possui_beneficios: "Benefícios", alergia: "Alergia",
+  medicacao: "Medicação", numero_irmaos: "Nº irmãos", profissao_mae: "Profissão (mãe)",
+  profissao_pai: "Profissão (pai)", idade: "Idade", total: "Total", valor: "Valor",
+};
+
+function labelOf(col: string) {
+  return COLUMN_LABELS[col] ?? col.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function calcAge(dob: string | null | undefined): string {
+  if (!dob) return "—";
+  const d = new Date(dob);
+  if (isNaN(d.getTime())) return "—";
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  if (now.getMonth() < d.getMonth() || (now.getMonth() === d.getMonth() && now.getDate() < d.getDate())) age--;
+  return `${age} anos`;
+}
+
+function formatCell(col: string, v: any) {
+  if (v === null || v === undefined || v === "") return "—";
+  if (col === "ativo") return v ? "Ativo" : "Inativo";
+  if (typeof v === "boolean") return v ? "Sim" : "Não";
+  if (col === "data_nascimento") {
+    const age = calcAge(String(v));
+    const d = new Date(String(v));
+    if (!isNaN(d.getTime())) return `${d.toLocaleDateString("pt-BR")} (${age})`;
+  }
+  if (/^data_/.test(col)) {
+    const d = new Date(String(v));
+    if (!isNaN(d.getTime())) return d.toLocaleDateString("pt-BR");
+  }
+  return String(v);
+}
+
 function rowToValues(row: any, cols: string[]) {
-  return cols.map((c) => {
-    const v = row?.[c];
-    if (v === null || v === undefined || v === "") return "—";
-    if (typeof v === "boolean") return v ? "Sim" : "Não";
-    return String(v);
-  });
+  return cols.map((c) => formatCell(c, row?.[c]));
 }
 
 function stripMd(s: string) {
