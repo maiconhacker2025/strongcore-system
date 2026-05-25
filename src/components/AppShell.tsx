@@ -91,8 +91,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className="flex-1 min-w-0">{children}</div>
       </main>
-
-      <BackupReminder />
     </div>
   );
 }
