@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RequireAuth } from "@/components/RequireAuth";
 import { AppShell } from "@/components/AppShell";
 import { BeneficiarioForm, type Beneficiario } from "@/components/BeneficiarioForm";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,7 @@ import {
 
 export const Route = createFileRoute("/beneficiarios/$id")({
   component: () => (
-    <RequireAuth><AppShell><EditPage /></AppShell></RequireAuth>
+    <AppShell><EditPage /></AppShell>
   ),
 });
 

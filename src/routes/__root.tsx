@@ -7,7 +7,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
-import { AuthProvider } from "@/lib/auth-context";
+
 
 import appCss from "../styles.css?url";
 
@@ -52,8 +52,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Progredir — Gestão de Beneficiários" },
-      { name: "description", content: "Sistema de gestão de beneficiários do programa Progredir" },
+      { title: "Beneficiários" },
+      { name: "description", content: "Sistema de gestão de beneficiários" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),
@@ -76,10 +76,8 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Outlet />
-        <Toaster richColors position="top-right" />
-      </AuthProvider>
+      <Outlet />
+      <Toaster richColors position="top-right" />
     </QueryClientProvider>
   );
 }
