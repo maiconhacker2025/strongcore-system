@@ -149,33 +149,67 @@ export async function exportXlsx(d: ReportData) {
   try {
     const wb = XLSX.utils.book_new();
 
-    const meta = [
-      ["Relatório", d.title],
-      ["Gerado em", today()],
-      [],
-      ["Pergunta", d.question],
-      ["Resposta", stripMd(d.answer)],
-    ];
-    const ws = XLSX.utils.aoa_to_sheet(meta);
-    ws["!cols"] = [{ wch: 18 }, { wch: 80 }];
-    XLSX.utils.book_append_sheet(wb, ws, "Resumo");
+    // Coleta todos os nomes de todas as tabelas, remove duplicatas e ordena alfabeticamente
+    const nomesSet = new Set<string>();
+    for (const t of d.tables) {
+      const nomeCol = t.columns.find((c) => c.toLowerCase() === "nome");
+      if (!nomeCol) continue;
+      for (const r of t.rows) {
+        const v = (r as any)[nomeCol];
+        if (v !== null && v !== undefined && String(v).trim() !== "") {
+          nomesSet.add(String(v).trim());
+        }
+      }
+    }
 
-    d.tables.forEach((t, i) => {
-      const body = [t.columns.map(labelOf), ...t.rows.map((r) => rowToValues(r, t.columns))];
-      const s = XLSX.utils.aoa_to_sheet(body);
-      s["!cols"] = t.columns.map((c) => ({ wch: c === "nome" ? 32 : c === "escola" ? 28 : 18 }));
-      const safeName = (t.title || `Tabela ${i + 1}`)
-        .replace(/[\\\/\?\*\[\]:]/g, " ")
-        .slice(0, 28);
-      XLSX.utils.book_append_sheet(wb, s, safeName);
+    const nomes = Array.from(nomesSet).sort((a, b) =>
+      a.localeCompare(b, "pt-BR", { sensitivity: "base" })
+    );
+
+    const body: any[][] = [
+      ["Nº", "Nome"],
+      ...nomes.map((nome, i) => [i + 1, nome]),
+      [],
+      ["Total", nomes.length],
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(body);
+    ws["!cols"] = [{ wch: 6 }, { wch: 40 }];
+
+    // Estiliza cabeçalho
+    const headerStyle = {
+      font: { bold: true, color: { rgb: "FFFFFF" } },
+      fill: { fgColor: { rgb: "2563EB" } },
+      alignment: { horizontal: "center", vertical: "center" },
+    };
+    ["A1", "B1"].forEach((addr) => {
+      if (ws[addr]) ws[addr].s = headerStyle;
     });
 
-    const arrayBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    // Alinha coluna Nº ao centro
+    for (let i = 0; i < nomes.length; i++) {
+      const addr = `A${i + 2}`;
+      if (ws[addr]) ws[addr].s = { alignment: { horizontal: "center" } };
+    }
+
+    // Linha de total em negrito
+    const totalRow = nomes.length + 3;
+    const labelAddr = `A${totalRow}`;
+    const valueAddr = `B${totalRow}`;
+    if (ws[labelAddr]) ws[labelAddr].s = { font: { bold: true }, alignment: { horizontal: "right" } };
+    if (ws[valueAddr]) ws[valueAddr].s = { font: { bold: true } };
+
+    ws["!freeze"] = { xSplit: 0, ySplit: 1 } as any;
+    ws["!autofilter"] = { ref: `A1:B${nomes.length + 1}` };
+
+    XLSX.utils.book_append_sheet(wb, ws, "Lista");
+
+    const arrayBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array", cellStyles: true });
     const blob = new Blob([arrayBuffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
     downloadBlob(blob, `${slug(d.title)}.xlsx`);
-    toast.success("Excel gerado com sucesso");
+    toast.success(`Planilha gerada com ${nomes.length} nome(s)`);
   } catch (e: any) {
     console.error("exportXlsx error", e);
     toast.error(`Erro ao gerar Excel: ${e?.message ?? e}`);
