@@ -14,7 +14,297 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      beneficiarios: {
+        Row: {
+          agua: string | null
+          alergia: boolean | null
+          ano_anterior: string | null
+          ar_condicionado: string | null
+          armario_cozinha: string | null
+          assistente_social: string | null
+          ativo: boolean
+          bairro: string | null
+          cama_casal: string | null
+          cama_filhos: string | null
+          celular: string | null
+          cep: string | null
+          circunscricao: string | null
+          classe_risco: string | null
+          codigo: number | null
+          computador: string | null
+          cpf: string | null
+          created_at: string
+          data_desligamento_01: string | null
+          data_desligamento_02: string | null
+          data_desligamento_03: string | null
+          data_ingresso_01: string | null
+          data_ingresso_02: string | null
+          data_ingresso_03: string | null
+          data_nasc_mae_2: string | null
+          data_nascimento: string | null
+          distrito: string | null
+          email: string | null
+          energia_eletrica: string | null
+          escola: string | null
+          escolaridade: string | null
+          escolaridade_mae_2: string | null
+          escolaridade_pai: string | null
+          esgoto: string | null
+          estado: string | null
+          filtro: string | null
+          fogao: string | null
+          freezer: string | null
+          genero: string | null
+          guarda_roupas: string | null
+          id: string
+          internet: string | null
+          lixo: string | null
+          louca_geral: string | null
+          maq_lavar: string | null
+          medicacao: boolean | null
+          micro_ondas: string | null
+          mora_com: string | null
+          moveis_estofados: string | null
+          nasc_mae: string | null
+          nasc_pai: string | null
+          nome: string
+          nome_mae: string | null
+          nome_mae_2: string | null
+          nome_medico: string | null
+          nome_pai: string | null
+          nome_responsavel: string | null
+          num_folha: string | null
+          num_livro: string | null
+          num_termo: string | null
+          numero_comodos: string | null
+          numero_irmaos: number | null
+          observacoes: string | null
+          pais: string | null
+          possui_banheiro: string | null
+          possui_beneficios: string | null
+          possui_dificuldades: string | null
+          possui_geladeira: string | null
+          profissao_mae: string | null
+          profissao_pai: string | null
+          psicologa: string | null
+          renda: string | null
+          reside_em: string | null
+          residencia: string | null
+          residencial: string | null
+          responsavel: string | null
+          rg: string | null
+          roupa_cama: string | null
+          rua: string | null
+          som: string | null
+          tel_emergencia_01: string | null
+          tel_emergencia_02: string | null
+          tel_medico: string | null
+          tel_responsavel: string | null
+          tenis_atividades: string | null
+          trabalha_mae: string | null
+          trabalha_mae_2: string | null
+          trabalha_pai: string | null
+          transporte_coletivo: string | null
+          turno: string | null
+          tv: string | null
+          updated_at: string
+          ventilador: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          agua?: string | null
+          alergia?: boolean | null
+          ano_anterior?: string | null
+          ar_condicionado?: string | null
+          armario_cozinha?: string | null
+          assistente_social?: string | null
+          ativo?: boolean
+          bairro?: string | null
+          cama_casal?: string | null
+          cama_filhos?: string | null
+          celular?: string | null
+          cep?: string | null
+          circunscricao?: string | null
+          classe_risco?: string | null
+          codigo?: number | null
+          computador?: string | null
+          cpf?: string | null
+          created_at?: string
+          data_desligamento_01?: string | null
+          data_desligamento_02?: string | null
+          data_desligamento_03?: string | null
+          data_ingresso_01?: string | null
+          data_ingresso_02?: string | null
+          data_ingresso_03?: string | null
+          data_nasc_mae_2?: string | null
+          data_nascimento?: string | null
+          distrito?: string | null
+          email?: string | null
+          energia_eletrica?: string | null
+          escola?: string | null
+          escolaridade?: string | null
+          escolaridade_mae_2?: string | null
+          escolaridade_pai?: string | null
+          esgoto?: string | null
+          estado?: string | null
+          filtro?: string | null
+          fogao?: string | null
+          freezer?: string | null
+          genero?: string | null
+          guarda_roupas?: string | null
+          id?: string
+          internet?: string | null
+          lixo?: string | null
+          louca_geral?: string | null
+          maq_lavar?: string | null
+          medicacao?: boolean | null
+          micro_ondas?: string | null
+          mora_com?: string | null
+          moveis_estofados?: string | null
+          nasc_mae?: string | null
+          nasc_pai?: string | null
+          nome: string
+          nome_mae?: string | null
+          nome_mae_2?: string | null
+          nome_medico?: string | null
+          nome_pai?: string | null
+          nome_responsavel?: string | null
+          num_folha?: string | null
+          num_livro?: string | null
+          num_termo?: string | null
+          numero_comodos?: string | null
+          numero_irmaos?: number | null
+          observacoes?: string | null
+          pais?: string | null
+          possui_banheiro?: string | null
+          possui_beneficios?: string | null
+          possui_dificuldades?: string | null
+          possui_geladeira?: string | null
+          profissao_mae?: string | null
+          profissao_pai?: string | null
+          psicologa?: string | null
+          renda?: string | null
+          reside_em?: string | null
+          residencia?: string | null
+          residencial?: string | null
+          responsavel?: string | null
+          rg?: string | null
+          roupa_cama?: string | null
+          rua?: string | null
+          som?: string | null
+          tel_emergencia_01?: string | null
+          tel_emergencia_02?: string | null
+          tel_medico?: string | null
+          tel_responsavel?: string | null
+          tenis_atividades?: string | null
+          trabalha_mae?: string | null
+          trabalha_mae_2?: string | null
+          trabalha_pai?: string | null
+          transporte_coletivo?: string | null
+          turno?: string | null
+          tv?: string | null
+          updated_at?: string
+          ventilador?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          agua?: string | null
+          alergia?: boolean | null
+          ano_anterior?: string | null
+          ar_condicionado?: string | null
+          armario_cozinha?: string | null
+          assistente_social?: string | null
+          ativo?: boolean
+          bairro?: string | null
+          cama_casal?: string | null
+          cama_filhos?: string | null
+          celular?: string | null
+          cep?: string | null
+          circunscricao?: string | null
+          classe_risco?: string | null
+          codigo?: number | null
+          computador?: string | null
+          cpf?: string | null
+          created_at?: string
+          data_desligamento_01?: string | null
+          data_desligamento_02?: string | null
+          data_desligamento_03?: string | null
+          data_ingresso_01?: string | null
+          data_ingresso_02?: string | null
+          data_ingresso_03?: string | null
+          data_nasc_mae_2?: string | null
+          data_nascimento?: string | null
+          distrito?: string | null
+          email?: string | null
+          energia_eletrica?: string | null
+          escola?: string | null
+          escolaridade?: string | null
+          escolaridade_mae_2?: string | null
+          escolaridade_pai?: string | null
+          esgoto?: string | null
+          estado?: string | null
+          filtro?: string | null
+          fogao?: string | null
+          freezer?: string | null
+          genero?: string | null
+          guarda_roupas?: string | null
+          id?: string
+          internet?: string | null
+          lixo?: string | null
+          louca_geral?: string | null
+          maq_lavar?: string | null
+          medicacao?: boolean | null
+          micro_ondas?: string | null
+          mora_com?: string | null
+          moveis_estofados?: string | null
+          nasc_mae?: string | null
+          nasc_pai?: string | null
+          nome?: string
+          nome_mae?: string | null
+          nome_mae_2?: string | null
+          nome_medico?: string | null
+          nome_pai?: string | null
+          nome_responsavel?: string | null
+          num_folha?: string | null
+          num_livro?: string | null
+          num_termo?: string | null
+          numero_comodos?: string | null
+          numero_irmaos?: number | null
+          observacoes?: string | null
+          pais?: string | null
+          possui_banheiro?: string | null
+          possui_beneficios?: string | null
+          possui_dificuldades?: string | null
+          possui_geladeira?: string | null
+          profissao_mae?: string | null
+          profissao_pai?: string | null
+          psicologa?: string | null
+          renda?: string | null
+          reside_em?: string | null
+          residencia?: string | null
+          residencial?: string | null
+          responsavel?: string | null
+          rg?: string | null
+          roupa_cama?: string | null
+          rua?: string | null
+          som?: string | null
+          tel_emergencia_01?: string | null
+          tel_emergencia_02?: string | null
+          tel_medico?: string | null
+          tel_responsavel?: string | null
+          tenis_atividades?: string | null
+          trabalha_mae?: string | null
+          trabalha_mae_2?: string | null
+          trabalha_pai?: string | null
+          transporte_coletivo?: string | null
+          turno?: string | null
+          tv?: string | null
+          updated_at?: string
+          ventilador?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
