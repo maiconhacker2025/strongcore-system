@@ -161,9 +161,9 @@ export async function exportXlsx(d: ReportData) {
     XLSX.utils.book_append_sheet(wb, ws, "Resumo");
 
     d.tables.forEach((t, i) => {
-      const body = [t.columns, ...t.rows.map((r) => rowToValues(r, t.columns))];
+      const body = [t.columns.map(labelOf), ...t.rows.map((r) => rowToValues(r, t.columns))];
       const s = XLSX.utils.aoa_to_sheet(body);
-      s["!cols"] = t.columns.map(() => ({ wch: 22 }));
+      s["!cols"] = t.columns.map((c) => ({ wch: c === "nome" ? 32 : c === "escola" ? 28 : 18 }));
       const safeName = (t.title || `Tabela ${i + 1}`)
         .replace(/[\\\/\?\*\[\]:]/g, " ")
         .slice(0, 28);
