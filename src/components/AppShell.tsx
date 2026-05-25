@@ -6,7 +6,7 @@ import { BackupReminder } from "@/components/BackupReminder";
 import { Button } from "@/components/ui/button";
 import { runFullBackup, daysSinceBackup } from "@/lib/backup";
 import logo from "@/assets/logo-progredir.jpg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const navItems = [
   { to: "/", label: "Painel", icon: LayoutDashboard },
@@ -19,14 +19,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [busy, setBusy] = useState(false);
   const [days, setDays] = useState<number | null>(null);
-  useState(() => { /* noop placeholder */ });
-  if (typeof window !== "undefined" && days === null) {
-    // hydration-safe: read in effect
-  }
+
+  useEffect(() => { setDays(daysSinceBackup()); }, []);
 
   const doBackup = async () => {
     setBusy(true);
     await runFullBackup();
+    setDays(0);
     setBusy(false);
   };
 
