@@ -35,8 +35,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <AuthGate>
     <div className="min-h-screen flex bg-background">
       <aside className="hidden md:flex w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
-        <div className="px-6 py-6 border-b border-sidebar-border bg-white/95">
-          <img src={logo} alt="Espaço Progredir — Acreditando na vida" className="h-16 mx-auto object-contain" />
+        <div className="relative px-5 pt-6 pb-5 border-b border-sidebar-border overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-primary/5" />
+          <div className="absolute -top-12 -right-12 size-32 rounded-full bg-primary/10 blur-2xl" />
+          <div className="absolute -bottom-10 -left-10 size-24 rounded-full bg-primary/10 blur-2xl" />
+          <div className="relative flex flex-col items-center gap-2">
+            <div className="rounded-xl bg-white shadow-sm ring-1 ring-black/5 p-2">
+              <img src={logo} alt="Espaço Progredir — Acreditando na vida" className="h-14 object-contain" />
+            </div>
+            <div className="text-center mt-1">
+              <p className="font-display text-[15px] font-semibold tracking-tight text-foreground leading-none">
+                Espaço Progredir
+              </p>
+              <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                Acreditando na vida
+              </p>
+            </div>
+          </div>
         </div>
 
         <nav className="flex-1 px-3 py-6 space-y-1">
