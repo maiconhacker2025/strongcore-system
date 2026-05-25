@@ -43,7 +43,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("beneficiarios")
-        .select("id, nome, codigo, bairro, escola, escolaridade, ativo, classe_risco, genero, turno, data_nascimento, data_ingresso_01, data_desligamento_01, created_at, whatsapp, celular")
+        .select("id, nome, codigo, bairro, escola, escolaridade, ativo, classe_risco, genero, turno, data_nascimento, data_ingresso_01, data_desligamento_01, created_at, whatsapp, celular, alergia, medicacao, possui_beneficios, possui_dificuldades, renda")
         .limit(5000);
       if (error) throw error;
       return data ?? [];
@@ -63,6 +63,53 @@ function Dashboard() {
   const porRisco = groupBy(rows, "classe_risco");
   const porBairro = groupBy(rows, "bairro").slice(0, 6);
   const porTurno = groupBy(rows, "turno");
+  const porGenero = groupBy(rows, "genero");
+  const topEscolas = groupBy(rows.filter(r => r.ativo), "escola").slice(0, 5);
+
+  // Idade
+  const idades: number[] = [];
+  const now = new Date();
+  const thisMonth = now.getMonth();
+  const aniversariantes: any[] = [];
+  for (const r of rows) {
+    if (!r.data_nascimento) continue;
+    const d = new Date(r.data_nascimento);
+    let age = now.getFullYear() - d.getFullYear();
+    if (now.getMonth() < d.getMonth() || (now.getMonth() === d.getMonth() && now.getDate() < d.getDate())) age--;
+    if (age >= 0 && age < 120) idades.push(age);
+    if (d.getMonth() === thisMonth && r.ativo) {
+      aniversariantes.push({ ...r, _age: age, _day: d.getDate() });
+    }
+  }
+  aniversariantes.sort((a, b) => a._day - b._day);
+  const idadeMedia = idades.length ? Math.round(idades.reduce((a, b) => a + b, 0) / idades.length) : 0;
+
+  // Faixas etárias
+  const faixas = [
+    { name: "0-6", value: idades.filter(a => a <= 6).length },
+    { name: "7-10", value: idades.filter(a => a >= 7 && a <= 10).length },
+    { name: "11-14", value: idades.filter(a => a >= 11 && a <= 14).length },
+    { name: "15-17", value: idades.filter(a => a >= 15 && a <= 17).length },
+    { name: "18+", value: idades.filter(a => a >= 18).length },
+  ];
+
+  // Alertas
+  const comAlergia = rows.filter(r => r.alergia && r.ativo).length;
+  const comMedicacao = rows.filter(r => r.medicacao && r.ativo).length;
+  const semContato = rows.filter(r => r.ativo && !r.whatsapp && !r.celular).length;
+
+  // Ingressos por ano
+  const ingressoPorAno: Record<string, number> = {};
+  for (const r of rows) {
+    if (r.data_ingresso_01) {
+      const y = String(new Date(r.data_ingresso_01).getFullYear());
+      ingressoPorAno[y] = (ingressoPorAno[y] ?? 0) + 1;
+    }
+  }
+  const ingressoData = Object.entries(ingressoPorAno)
+    .map(([ano, total]) => ({ ano, total }))
+    .sort((a, b) => Number(a.ano) - Number(b.ano))
+    .slice(-6);
 
   // Desligamentos por ano
   const desligPorAno: Record<string, number> = {};
@@ -77,11 +124,19 @@ function Dashboard() {
     .map(([ano, total]) => ({ ano, total }))
     .sort((a, b) => Number(a.ano) - Number(b.ano));
 
+  // Ingressos este ano vs ano passado
+  const yearNow = now.getFullYear();
+  const ingressoEsteAno = ingressoPorAno[String(yearNow)] ?? 0;
+
   const stats = [
     { label: "Total cadastrados", value: total, icon: Users, color: "text-primary bg-primary-soft" },
-    { label: "Beneficiários ativos", value: ativos, icon: UserCheck, color: "text-success bg-success/10" },
-    { label: "Classe de risco alto", value: risco, icon: AlertTriangle, color: "text-destructive bg-destructive/10" },
+    { label: "Beneficiários ativos", value: ativos, icon: UserCheck, color: "text-success bg-success/10", hint: total ? `${Math.round((ativos / total) * 100)}% do total` : "" },
+    { label: "Classe de risco alto", value: risco, icon: AlertTriangle, color: "text-destructive bg-destructive/10", hint: ativos ? `${Math.round((risco / ativos) * 100)}% dos ativos` : "" },
     { label: "Inativos / desligados", value: inativos, icon: GraduationCap, color: "text-accent-foreground bg-accent" },
+    { label: "Idade média", value: idadeMedia ? `${idadeMedia} anos` : "—", icon: Cake, color: "text-purple-700 bg-purple-100" },
+    { label: "Ingressos em " + yearNow, value: ingressoEsteAno, icon: CalendarCheck2, color: "text-blue-700 bg-blue-100" },
+    { label: "Com medicação", value: comMedicacao, icon: Pill, color: "text-amber-700 bg-amber-100" },
+    { label: "Sem contato cadastrado", value: semContato, icon: PhoneOff, color: "text-rose-700 bg-rose-100", hint: "ativos sem WhatsApp/celular" },
   ];
 
   // Quick reports
