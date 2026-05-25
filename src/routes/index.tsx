@@ -6,7 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Users, UserCheck, AlertTriangle, GraduationCap, ArrowRight,
-  FileSpreadsheet, FileType2, Download, TrendingUp,
+  FileSpreadsheet, FileType2, Download, TrendingUp, Cake, HeartPulse,
+  Pill, PhoneOff, School, CalendarCheck2, UsersRound,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip,
@@ -42,7 +43,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("beneficiarios")
-        .select("id, nome, codigo, bairro, escola, escolaridade, ativo, classe_risco, genero, turno, data_nascimento, data_ingresso_01, data_desligamento_01, created_at, whatsapp, celular")
+        .select("id, nome, codigo, bairro, escola, escolaridade, ativo, classe_risco, genero, turno, data_nascimento, data_ingresso_01, data_desligamento_01, created_at, whatsapp, celular, alergia, medicacao, possui_beneficios, possui_dificuldades, renda")
         .limit(5000);
       if (error) throw error;
       return data ?? [];
@@ -62,6 +63,53 @@ function Dashboard() {
   const porRisco = groupBy(rows, "classe_risco");
   const porBairro = groupBy(rows, "bairro").slice(0, 6);
   const porTurno = groupBy(rows, "turno");
+  const porGenero = groupBy(rows, "genero");
+  const topEscolas = groupBy(rows.filter(r => r.ativo), "escola").slice(0, 5);
+
+  // Idade
+  const idades: number[] = [];
+  const now = new Date();
+  const thisMonth = now.getMonth();
+  const aniversariantes: any[] = [];
+  for (const r of rows) {
+    if (!r.data_nascimento) continue;
+    const d = new Date(r.data_nascimento);
+    let age = now.getFullYear() - d.getFullYear();
+    if (now.getMonth() < d.getMonth() || (now.getMonth() === d.getMonth() && now.getDate() < d.getDate())) age--;
+    if (age >= 0 && age < 120) idades.push(age);
+    if (d.getMonth() === thisMonth && r.ativo) {
+      aniversariantes.push({ ...r, _age: age, _day: d.getDate() });
+    }
+  }
+  aniversariantes.sort((a, b) => a._day - b._day);
+  const idadeMedia = idades.length ? Math.round(idades.reduce((a, b) => a + b, 0) / idades.length) : 0;
+
+  // Faixas etárias
+  const faixas = [
+    { name: "0-6", value: idades.filter(a => a <= 6).length },
+    { name: "7-10", value: idades.filter(a => a >= 7 && a <= 10).length },
+    { name: "11-14", value: idades.filter(a => a >= 11 && a <= 14).length },
+    { name: "15-17", value: idades.filter(a => a >= 15 && a <= 17).length },
+    { name: "18+", value: idades.filter(a => a >= 18).length },
+  ];
+
+  // Alertas
+  const comAlergia = rows.filter(r => r.alergia && r.ativo).length;
+  const comMedicacao = rows.filter(r => r.medicacao && r.ativo).length;
+  const semContato = rows.filter(r => r.ativo && !r.whatsapp && !r.celular).length;
+
+  // Ingressos por ano
+  const ingressoPorAno: Record<string, number> = {};
+  for (const r of rows) {
+    if (r.data_ingresso_01) {
+      const y = String(new Date(r.data_ingresso_01).getFullYear());
+      ingressoPorAno[y] = (ingressoPorAno[y] ?? 0) + 1;
+    }
+  }
+  const ingressoData = Object.entries(ingressoPorAno)
+    .map(([ano, total]) => ({ ano, total }))
+    .sort((a, b) => Number(a.ano) - Number(b.ano))
+    .slice(-6);
 
   // Desligamentos por ano
   const desligPorAno: Record<string, number> = {};
@@ -76,11 +124,19 @@ function Dashboard() {
     .map(([ano, total]) => ({ ano, total }))
     .sort((a, b) => Number(a.ano) - Number(b.ano));
 
+  // Ingressos este ano vs ano passado
+  const yearNow = now.getFullYear();
+  const ingressoEsteAno = ingressoPorAno[String(yearNow)] ?? 0;
+
   const stats = [
     { label: "Total cadastrados", value: total, icon: Users, color: "text-primary bg-primary-soft" },
-    { label: "Beneficiários ativos", value: ativos, icon: UserCheck, color: "text-success bg-success/10" },
-    { label: "Classe de risco alto", value: risco, icon: AlertTriangle, color: "text-destructive bg-destructive/10" },
+    { label: "Beneficiários ativos", value: ativos, icon: UserCheck, color: "text-success bg-success/10", hint: total ? `${Math.round((ativos / total) * 100)}% do total` : "" },
+    { label: "Classe de risco alto", value: risco, icon: AlertTriangle, color: "text-destructive bg-destructive/10", hint: ativos ? `${Math.round((risco / ativos) * 100)}% dos ativos` : "" },
     { label: "Inativos / desligados", value: inativos, icon: GraduationCap, color: "text-accent-foreground bg-accent" },
+    { label: "Idade média", value: idadeMedia ? `${idadeMedia} anos` : "—", icon: Cake, color: "text-purple-700 bg-purple-100" },
+    { label: "Ingressos em " + yearNow, value: ingressoEsteAno, icon: CalendarCheck2, color: "text-blue-700 bg-blue-100" },
+    { label: "Com medicação", value: comMedicacao, icon: Pill, color: "text-amber-700 bg-amber-100" },
+    { label: "Sem contato cadastrado", value: semContato, icon: PhoneOff, color: "text-rose-700 bg-rose-100", hint: "ativos sem WhatsApp/celular" },
   ];
 
   // Quick reports
@@ -162,22 +218,167 @@ function Dashboard() {
       </header>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map((s) => {
           const Icon = s.icon;
           return (
-            <Card key={s.label} className="p-5">
-              <div className={`size-10 rounded-xl flex items-center justify-center ${s.color}`}>
-                <Icon className="size-5" />
+            <Card key={s.label} className="p-4">
+              <div className={`size-9 rounded-xl flex items-center justify-center ${s.color}`}>
+                <Icon className="size-4" />
               </div>
-              <div className="mt-4">
-                <div className="text-3xl font-display font-bold">{isLoading ? "…" : s.value}</div>
-                <div className="text-sm text-muted-foreground mt-1">{s.label}</div>
+              <div className="mt-3">
+                <div className="text-2xl font-display font-bold leading-tight">{isLoading ? "…" : s.value}</div>
+                <div className="text-xs text-muted-foreground mt-1">{s.label}</div>
+                {(s as any).hint && <div className="text-[11px] text-muted-foreground/70 mt-0.5">{(s as any).hint}</div>}
               </div>
             </Card>
           );
         })}
       </div>
+
+      {/* Destaques: Aniversariantes + Alertas */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
+        <Card className="p-5 lg:col-span-2">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-display font-semibold flex items-center gap-2">
+              <Cake className="size-5 text-purple-600" /> Aniversariantes do mês
+            </h2>
+            <span className="text-xs text-muted-foreground">{aniversariantes.length} pessoa(s)</span>
+          </div>
+          {aniversariantes.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">Nenhum aniversariante este mês.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto">
+              {aniversariantes.slice(0, 10).map((a) => (
+                <Link key={a.id} to="/beneficiarios/$id" params={{ id: a.id }}
+                  className="flex items-center gap-3 p-2 rounded-lg border hover:bg-muted/50 transition-colors">
+                  <div className="size-9 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-semibold text-sm">
+                    {String(a._day).padStart(2, "0")}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium truncate">{a.nome}</div>
+                    <div className="text-xs text-muted-foreground">Faz {a._age + 1} anos</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
+            <HeartPulse className="size-5 text-rose-600" /> Alertas de saúde
+          </h2>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-2 rounded-lg bg-amber-50">
+              <div className="flex items-center gap-2 text-sm">
+                <Pill className="size-4 text-amber-700" /> Usa medicação
+              </div>
+              <span className="font-bold text-amber-700">{comMedicacao}</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-lg bg-rose-50">
+              <div className="flex items-center gap-2 text-sm">
+                <AlertTriangle className="size-4 text-rose-700" /> Possui alergia
+              </div>
+              <span className="font-bold text-rose-700">{comAlergia}</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-lg bg-orange-50">
+              <div className="flex items-center gap-2 text-sm">
+                <PhoneOff className="size-4 text-orange-700" /> Sem contato
+              </div>
+              <span className="font-bold text-orange-700">{semContato}</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-lg bg-red-50">
+              <div className="flex items-center gap-2 text-sm">
+                <AlertTriangle className="size-4 text-red-700" /> Risco alto
+              </div>
+              <span className="font-bold text-red-700">{risco}</span>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Faixa etária + Gênero + Top escolas */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+        <Card className="p-5">
+          <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
+            <UsersRound className="size-4 text-primary" /> Faixa etária
+          </h2>
+          <div className="h-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={faixas} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="value" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="font-display font-semibold mb-3">Gênero</h2>
+          <div className="h-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={porGenero} dataKey="value" nameKey="name" innerRadius={35} outerRadius={70} paddingAngle={2}>
+                  {porGenero.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
+            <School className="size-4 text-emerald-600" /> Top escolas (ativos)
+          </h2>
+          {topEscolas.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">Sem dados.</p>
+          ) : (
+            <div className="space-y-2">
+              {topEscolas.map((e, i) => {
+                const max = topEscolas[0].value || 1;
+                return (
+                  <div key={e.name}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="truncate font-medium">{e.name}</span>
+                      <span className="text-muted-foreground">{e.value}</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full rounded-full" style={{ width: `${(e.value / max) * 100}%`, background: COLORS[i % COLORS.length] }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Card>
+      </div>
+
+      {/* Ingressos por ano */}
+      <Card className="p-5 mt-4">
+        <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
+          <CalendarCheck2 className="size-4 text-blue-600" /> Ingressos por ano (últimos)
+        </h2>
+        <div className="h-48">
+          {ingressoData.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-sm text-muted-foreground">Sem ingressos registrados.</div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={ingressoData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                <XAxis dataKey="ano" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="total" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </Card>
+
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-8">
