@@ -126,11 +126,12 @@ export async function exportPdf(d: ReportData) {
       y += 8;
       autoTable(doc, {
         startY: y + 4,
-        head: [t.columns],
+        head: [t.columns.map(labelOf)],
         body: t.rows.map((r) => rowToValues(r, t.columns)),
-        styles: { fontSize: 9, cellPadding: 4 },
-        headStyles: { fillColor: [37, 99, 235], textColor: 255 },
-        margin: { left: 40, right: 40 },
+        styles: { fontSize: 8, cellPadding: 3, overflow: "linebreak" },
+        headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: "bold" },
+        alternateRowStyles: { fillColor: [245, 247, 250] },
+        margin: { left: 30, right: 30 },
       });
       y = (doc as any).lastAutoTable.finalY + 20;
     }
