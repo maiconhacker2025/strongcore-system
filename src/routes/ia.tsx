@@ -8,12 +8,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Sparkles, Send, Loader2, Download, FileText, FileSpreadsheet, FileType2, Bot, User } from "lucide-react";
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
+import { Sparkles, Send, Loader2, FileText, FileSpreadsheet, FileType2, Bot, User, FileBarChart2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { askDataAi } from "@/lib/data-ai.functions";
-import { exportPdf, exportDocx, exportXlsx, type ReportTable } from "@/lib/export-report";
+import { exportPdf, exportDocx, exportXlsx, type ReportTable, type ReportData } from "@/lib/export-report";
 
 export const Route = createFileRoute("/ia")({
   component: () => <AppShell><IAPage /></AppShell>,
