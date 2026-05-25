@@ -1,14 +1,21 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, UserPlus } from "lucide-react";
+import { Search, UserPlus, UserCheck, UserMinus, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { z } from "zod";
+
+const searchSchema = z.object({
+  status: z.enum(["ativos", "inativos"]).optional(),
+});
 
 export const Route = createFileRoute("/beneficiarios/")({
+  validateSearch: (s) => searchSchema.parse(s),
   component: () => (
     <AppShell><ListPage /></AppShell>
   ),
@@ -17,8 +24,11 @@ export const Route = createFileRoute("/beneficiarios/")({
 type Filter = "todos" | "ativos" | "inativos";
 
 function ListPage() {
+  const navigate = useNavigate({ from: "/beneficiarios" });
+  const { status } = useSearch({ from: "/beneficiarios/" });
+  const filter: Filter = status ?? "todos";
   const [q, setQ] = useState("");
-  const [filter, setFilter] = useState<Filter>("todos");
+  const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["beneficiarios", q, filter],
@@ -37,11 +47,35 @@ function ListPage() {
     },
   });
 
+  const toggle = useMutation({
+    mutationFn: async ({ id, ativo }: { id: string; ativo: boolean }) => {
+      const { error } = await supabase.from("beneficiarios").update({ ativo }).eq("id", id);
+      if (error) throw error;
+      return { id, ativo };
+    },
+    onSuccess: ({ ativo }) => {
+      toast.success(ativo ? "Beneficiário marcado como ativo" : "Beneficiário marcado como inativo");
+      qc.invalidateQueries({ queryKey: ["beneficiarios"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-data"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Erro ao atualizar"),
+  });
+
+  const setFilter = (f: Filter) => {
+    navigate({ search: f === "todos" ? {} : { status: f } });
+  };
+
+  const titleMap: Record<Filter, string> = {
+    todos: "Beneficiários",
+    ativos: "Beneficiários ativos",
+    inativos: "Beneficiários inativos",
+  };
+
   return (
     <div className="p-6 md:p-10 max-w-7xl mx-auto">
       <header className="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-display font-bold">Beneficiários</h1>
+          <h1 className="text-3xl font-display font-bold">{titleMap[filter]}</h1>
           <p className="text-muted-foreground mt-1">
             {data ? `${data.length} registro(s)` : "Carregando..."}
           </p>
@@ -84,23 +118,21 @@ function ListPage() {
                 <th className="px-4 py-3 font-semibold">Nome</th>
                 <th className="px-4 py-3 font-semibold">Cód.</th>
                 <th className="px-4 py-3 font-semibold">Idade</th>
-                <th className="px-4 py-3 font-semibold">Gênero</th>
-                <th className="px-4 py-3 font-semibold">Escolaridade</th>
-                <th className="px-4 py-3 font-semibold">Turno</th>
                 <th className="px-4 py-3 font-semibold">Escola</th>
                 <th className="px-4 py-3 font-semibold">Bairro</th>
                 <th className="px-4 py-3 font-semibold">Responsável</th>
                 <th className="px-4 py-3 font-semibold">Contato</th>
                 <th className="px-4 py-3 font-semibold">Risco</th>
                 <th className="px-4 py-3 font-semibold">Status</th>
+                <th className="px-4 py-3 font-semibold text-right">Ação</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {isLoading && (
-                <tr><td colSpan={12} className="text-center py-10 text-muted-foreground">Carregando...</td></tr>
+                <tr><td colSpan={10} className="text-center py-10 text-muted-foreground">Carregando...</td></tr>
               )}
               {!isLoading && data?.length === 0 && (
-                <tr><td colSpan={12} className="text-center py-10 text-muted-foreground">Nenhum beneficiário encontrado.</td></tr>
+                <tr><td colSpan={10} className="text-center py-10 text-muted-foreground">Nenhum beneficiário encontrado.</td></tr>
               )}
               {data?.map((b: any) => {
                 const idade = b.data_nascimento
@@ -108,6 +140,7 @@ function ListPage() {
                   : null;
                 const contato = b.whatsapp || b.celular || "—";
                 const resp = b.responsavel || b.nome_mae || "—";
+                const busy = toggle.isPending && toggle.variables?.id === b.id;
                 return (
                 <tr key={b.id} className="hover:bg-muted/40 transition-colors">
                   <td className="px-4 py-3">
@@ -117,9 +150,6 @@ function ListPage() {
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{b.codigo ?? "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{idade !== null ? `${idade}a` : "—"}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{b.genero ?? "—"}</td>
-                  <td className="px-4 py-3 text-muted-foreground truncate max-w-[140px]">{b.escolaridade ?? "—"}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{b.turno ?? "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground truncate max-w-[180px]">{b.escola ?? "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{b.bairro ?? "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground truncate max-w-[140px]">{resp}</td>
@@ -136,6 +166,18 @@ function ListPage() {
                     ) : (
                       <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground font-medium">Inativo</span>
                     )}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Button
+                      variant={b.ativo ? "outline" : "default"}
+                      size="sm"
+                      disabled={busy}
+                      onClick={() => toggle.mutate({ id: b.id, ativo: !b.ativo })}
+                    >
+                      {busy ? <Loader2 className="size-3.5 animate-spin" />
+                        : b.ativo ? <><UserMinus className="size-3.5" /> Inativar</>
+                        : <><UserCheck className="size-3.5" /> Ativar</>}
+                    </Button>
                   </td>
                 </tr>
                 );

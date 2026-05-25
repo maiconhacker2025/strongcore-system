@@ -1,19 +1,20 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Users, LayoutDashboard, UserPlus, Sparkles, Download } from "lucide-react";
+import { Users, LayoutDashboard, UserPlus, Sparkles, Download, UserCheck, UserMinus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { QuickSearch } from "@/components/QuickSearch";
-import { BackupReminder } from "@/components/BackupReminder";
 import { Button } from "@/components/ui/button";
 import { runFullBackup, daysSinceBackup } from "@/lib/backup";
 import logo from "@/assets/logo-progredir.jpg";
 import { useEffect, useState } from "react";
 
 const navItems = [
-  { to: "/", label: "Painel", icon: LayoutDashboard },
-  { to: "/beneficiarios", label: "Beneficiários", icon: Users },
+  { to: "/", label: "Painel", icon: LayoutDashboard, exact: true },
+  { to: "/beneficiarios", label: "Todos beneficiários", icon: Users, exact: true, search: {} },
+  { to: "/beneficiarios", label: "Ativos", icon: UserCheck, search: { status: "ativos" }, match: "ativos" },
+  { to: "/beneficiarios", label: "Inativos", icon: UserMinus, search: { status: "inativos" }, match: "inativos" },
   { to: "/beneficiarios/novo", label: "Cadastrar", icon: UserPlus },
   { to: "/ia", label: "Assistente IA", icon: Sparkles },
-];
+] as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -39,11 +40,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 px-3 py-6 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const active = item.to === "/" ? path === "/" : path.startsWith(item.to);
+            const search = (item as any).search;
+            const matchKey = (item as any).match as string | undefined;
+            const isExact = (item as any).exact;
+            const currentStatus = typeof window !== "undefined"
+              ? new URLSearchParams(window.location.search).get("status")
+              : null;
+            let active = false;
+            if (item.to === "/") active = path === "/";
+            else if (matchKey) active = path === item.to && currentStatus === matchKey;
+            else if (isExact) active = path === item.to && !currentStatus;
+            else active = path.startsWith(item.to);
             return (
               <Link
-                key={item.to}
+                key={item.label}
                 to={item.to}
+                search={search as any}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                   active
@@ -79,8 +91,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className="flex-1 min-w-0">{children}</div>
       </main>
-
-      <BackupReminder />
     </div>
   );
 }
