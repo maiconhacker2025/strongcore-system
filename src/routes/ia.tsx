@@ -224,13 +224,13 @@ function ExportMenu({ question, answer, tables }: { question: string; answer: st
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
-        <DropdownMenuItem onClick={() => exportPdf(data)}>
+        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setTimeout(() => exportPdf(data), 0); }}>
           <FileType2 className="size-4" /> PDF
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => exportDocx(data)}>
+        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setTimeout(() => exportDocx(data), 0); }}>
           <FileText className="size-4" /> Word (.docx)
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => exportXlsx(data)}>
+        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setTimeout(() => exportXlsx(data), 0); }}>
           <FileSpreadsheet className="size-4" /> Excel (.xlsx)
         </DropdownMenuItem>
       </DropdownMenuContent>
