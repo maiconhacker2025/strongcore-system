@@ -1,19 +1,20 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Users, LayoutDashboard, UserPlus, Sparkles, Download } from "lucide-react";
+import { Users, LayoutDashboard, UserPlus, Sparkles, Download, UserCheck, UserMinus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { QuickSearch } from "@/components/QuickSearch";
-import { BackupReminder } from "@/components/BackupReminder";
 import { Button } from "@/components/ui/button";
 import { runFullBackup, daysSinceBackup } from "@/lib/backup";
 import logo from "@/assets/logo-progredir.jpg";
 import { useEffect, useState } from "react";
 
 const navItems = [
-  { to: "/", label: "Painel", icon: LayoutDashboard },
-  { to: "/beneficiarios", label: "Beneficiários", icon: Users },
+  { to: "/", label: "Painel", icon: LayoutDashboard, exact: true },
+  { to: "/beneficiarios", label: "Todos beneficiários", icon: Users, exact: true, search: {} },
+  { to: "/beneficiarios", label: "Ativos", icon: UserCheck, search: { status: "ativos" }, match: "ativos" },
+  { to: "/beneficiarios", label: "Inativos", icon: UserMinus, search: { status: "inativos" }, match: "inativos" },
   { to: "/beneficiarios/novo", label: "Cadastrar", icon: UserPlus },
   { to: "/ia", label: "Assistente IA", icon: Sparkles },
-];
+] as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
