@@ -2,16 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RequireAuth } from "@/components/RequireAuth";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, UserPlus, Filter } from "lucide-react";
+import { Search, UserPlus } from "lucide-react";
 
 export const Route = createFileRoute("/beneficiarios/")({
   component: () => (
-    <RequireAuth><AppShell><ListPage /></AppShell></RequireAuth>
+    <AppShell><ListPage /></AppShell>
   ),
 });
 

@@ -1,18 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { RequireAuth } from "@/components/RequireAuth";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Users, UserCheck, AlertTriangle, GraduationCap, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: () => (
-    <RequireAuth>
-      <AppShell>
-        <Dashboard />
-      </AppShell>
-    </RequireAuth>
+    <AppShell>
+      <Dashboard />
+    </AppShell>
   ),
 });
 
@@ -46,7 +43,7 @@ function Dashboard() {
     <div className="p-6 md:p-10 max-w-7xl mx-auto">
       <header className="mb-8">
         <h1 className="text-3xl font-display font-bold">Painel geral</h1>
-        <p className="text-muted-foreground mt-1">Visão consolidada dos beneficiários do projeto Progredir.</p>
+        <p className="text-muted-foreground mt-1">Visão consolidada dos beneficiários cadastrados.</p>
       </header>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

@@ -1,6 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Users, LayoutDashboard, LogOut, UserPlus, Heart } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
+import { Users, LayoutDashboard, UserPlus, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -10,7 +9,6 @@ const navItems = [
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { user, signOut } = useAuth();
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   return (
@@ -22,8 +20,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Heart className="size-5 text-accent-foreground" fill="currentColor" />
             </div>
             <div>
-              <div className="font-display font-bold text-lg leading-tight">Progredir</div>
-              <div className="text-xs opacity-70">Gestão de Beneficiários</div>
+              <div className="font-display font-bold text-lg leading-tight">Beneficiários</div>
+              <div className="text-xs opacity-70">Sistema de gestão</div>
             </div>
           </div>
         </div>
@@ -49,17 +47,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-
-        <div className="p-3 border-t border-sidebar-border">
-          <div className="px-3 py-2 text-xs opacity-70 truncate">{user?.email}</div>
-          <button
-            onClick={signOut}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium opacity-80 hover:opacity-100 hover:bg-sidebar-accent/50 transition-colors"
-          >
-            <LogOut className="size-4" />
-            Sair
-          </button>
-        </div>
       </aside>
 
       <main className="flex-1 min-w-0">{children}</main>
