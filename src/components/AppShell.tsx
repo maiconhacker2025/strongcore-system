@@ -40,11 +40,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 px-3 py-6 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const active = item.to === "/" ? path === "/" : path.startsWith(item.to);
+            const search = (item as any).search;
+            const matchKey = (item as any).match as string | undefined;
+            const isExact = (item as any).exact;
+            const currentStatus = typeof window !== "undefined"
+              ? new URLSearchParams(window.location.search).get("status")
+              : null;
+            let active = false;
+            if (item.to === "/") active = path === "/";
+            else if (matchKey) active = path === item.to && currentStatus === matchKey;
+            else if (isExact) active = path === item.to && !currentStatus;
+            else active = path.startsWith(item.to);
             return (
               <Link
-                key={item.to}
+                key={item.label}
                 to={item.to}
+                search={search as any}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                   active
