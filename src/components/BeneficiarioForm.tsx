@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Check, RotateCcw, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 export type Beneficiario = Record<string, any>;
 
-type Field = { name: string; label: string; type?: "text" | "date" | "number" | "textarea" | "bool"; full?: boolean };
+type Field = { name: string; label: string; type?: "text" | "date" | "number" | "textarea" | "bool"; full?: boolean; suggest?: boolean };
 
 const sections: { title: string; fields: Field[] }[] = [
   {
@@ -35,8 +36,8 @@ const sections: { title: string; fields: Field[] }[] = [
       { name: "data_desligamento_02", label: "Desligamento 02", type: "date" },
       { name: "data_ingresso_03", label: "Ingresso 03", type: "date" },
       { name: "data_desligamento_03", label: "Desligamento 03", type: "date" },
-      { name: "assistente_social", label: "Assistente social" },
-      { name: "psicologa", label: "Psicóloga" },
+      { name: "assistente_social", label: "Assistente social", suggest: true },
+      { name: "psicologa", label: "Psicóloga", suggest: true },
     ],
   },
   {
