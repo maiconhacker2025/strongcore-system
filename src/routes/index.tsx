@@ -3,7 +3,18 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
-import { Users, UserCheck, AlertTriangle, GraduationCap, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Users, UserCheck, AlertTriangle, GraduationCap, ArrowRight,
+  FileSpreadsheet, FileType2, Download, TrendingUp,
+} from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip,
+  PieChart, Pie, Cell, Legend,
+} from "recharts";
+import { backupExcel, backupPdf, runFullBackup } from "@/lib/backup";
+import { exportPdf, exportXlsx, type ReportTable } from "@/lib/export-report";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   component: () => (
@@ -13,39 +24,144 @@ export const Route = createFileRoute("/")({
   ),
 });
 
+const COLORS = ["hsl(var(--primary))", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#ec4899"];
+
+function groupBy(rows: any[], key: string) {
+  const m: Record<string, number> = {};
+  for (const r of rows) {
+    const v = r[key];
+    const k = v === null || v === undefined || v === "" ? "Não informado" : String(v);
+    m[k] = (m[k] ?? 0) + 1;
+  }
+  return Object.entries(m).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+}
+
 function Dashboard() {
-  const { data } = useQuery({
-    queryKey: ["dashboard-stats"],
+  const { data, isLoading } = useQuery({
+    queryKey: ["dashboard-data"],
     queryFn: async () => {
-      const [total, ativos, risco, recentes] = await Promise.all([
-        supabase.from("beneficiarios").select("*", { count: "exact", head: true }),
-        supabase.from("beneficiarios").select("*", { count: "exact", head: true }).eq("ativo", true),
-        supabase.from("beneficiarios").select("*", { count: "exact", head: true }).eq("classe_risco", "Alto"),
-        supabase.from("beneficiarios").select("id, nome, bairro, escola, ativo, classe_risco").order("created_at", { ascending: false }).limit(8),
-      ]);
-      return {
-        total: total.count ?? 0,
-        ativos: ativos.count ?? 0,
-        risco: risco.count ?? 0,
-        recentes: recentes.data ?? [],
-      };
+      const { data, error } = await supabase
+        .from("beneficiarios")
+        .select("id, nome, codigo, bairro, escola, escolaridade, ativo, classe_risco, genero, turno, data_nascimento, data_ingresso_01, data_desligamento_01, created_at, whatsapp, celular")
+        .limit(5000);
+      if (error) throw error;
+      return data ?? [];
     },
   });
 
+  const rows = data ?? [];
+  const total = rows.length;
+  const ativos = rows.filter((r) => r.ativo).length;
+  const inativos = total - ativos;
+  const risco = rows.filter((r) => r.classe_risco === "Alto").length;
+  const recentes = [...rows]
+    .sort((a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime())
+    .slice(0, 8);
+
+  const porEscolaridade = groupBy(rows, "escolaridade").slice(0, 8);
+  const porRisco = groupBy(rows, "classe_risco");
+  const porBairro = groupBy(rows, "bairro").slice(0, 6);
+  const porTurno = groupBy(rows, "turno");
+
+  // Desligamentos por ano
+  const desligPorAno: Record<string, number> = {};
+  for (const r of rows) {
+    const d = r.data_desligamento_01;
+    if (d) {
+      const y = String(new Date(d).getFullYear());
+      desligPorAno[y] = (desligPorAno[y] ?? 0) + 1;
+    }
+  }
+  const desligData = Object.entries(desligPorAno)
+    .map(([ano, total]) => ({ ano, total }))
+    .sort((a, b) => Number(a.ano) - Number(b.ano));
+
   const stats = [
-    { label: "Total cadastrados", value: data?.total ?? "—", icon: Users, color: "text-primary bg-primary-soft" },
-    { label: "Beneficiários ativos", value: data?.ativos ?? "—", icon: UserCheck, color: "text-success bg-success/10" },
-    { label: "Classe de risco alto", value: data?.risco ?? "—", icon: AlertTriangle, color: "text-destructive bg-destructive/10" },
-    { label: "Em acompanhamento", value: data ? (data.ativos) : "—", icon: GraduationCap, color: "text-accent-foreground bg-accent" },
+    { label: "Total cadastrados", value: total, icon: Users, color: "text-primary bg-primary-soft" },
+    { label: "Beneficiários ativos", value: ativos, icon: UserCheck, color: "text-success bg-success/10" },
+    { label: "Classe de risco alto", value: risco, icon: AlertTriangle, color: "text-destructive bg-destructive/10" },
+    { label: "Inativos / desligados", value: inativos, icon: GraduationCap, color: "text-accent-foreground bg-accent" },
   ];
+
+  // Quick reports
+  const quickReports: { title: string; build: () => { table: ReportTable; question: string } }[] = [
+    {
+      title: "Beneficiários ativos",
+      build: () => ({
+        question: "Lista de todos os beneficiários ativos",
+        table: {
+          title: "Beneficiários ativos",
+          columns: ["codigo", "nome", "escola", "bairro", "classe_risco"],
+          rows: rows.filter((r) => r.ativo),
+        },
+      }),
+    },
+    {
+      title: "Por escolaridade",
+      build: () => ({
+        question: "Distribuição de beneficiários por escolaridade",
+        table: { title: "Por escolaridade", columns: ["escolaridade", "total"], rows: porEscolaridade.map((d) => ({ escolaridade: d.name, total: d.value })) },
+      }),
+    },
+    {
+      title: "Por bairro",
+      build: () => ({
+        question: "Distribuição de beneficiários por bairro",
+        table: { title: "Por bairro", columns: ["bairro", "total"], rows: groupBy(rows, "bairro").map((d) => ({ bairro: d.name, total: d.value })) },
+      }),
+    },
+    {
+      title: "Risco alto",
+      build: () => ({
+        question: "Beneficiários com classe de risco Alto",
+        table: { title: "Risco alto", columns: ["codigo", "nome", "escola", "bairro", "whatsapp"], rows: rows.filter((r) => r.classe_risco === "Alto") },
+      }),
+    },
+    {
+      title: "Desligamentos por ano",
+      build: () => ({
+        question: "Quantos beneficiários foram desligados por ano",
+        table: { title: "Desligamentos por ano", columns: ["ano", "total"], rows: desligData },
+      }),
+    },
+  ];
+
+  const runQuick = (q: typeof quickReports[number], format: "pdf" | "xlsx") => {
+    const { table, question } = q.build();
+    if (table.rows.length === 0) {
+      toast.warning("Sem dados para este relatório.");
+      return;
+    }
+    const data = {
+      title: `Relatório — ${q.title}`,
+      question,
+      answer: `Total de ${table.rows.length} registro(s).`,
+      tables: [table],
+    };
+    if (format === "pdf") exportPdf(data); else exportXlsx(data);
+  };
 
   return (
     <div className="p-6 md:p-10 max-w-7xl mx-auto">
-      <header className="mb-8">
-        <h1 className="text-3xl font-display font-bold">Painel geral</h1>
-        <p className="text-muted-foreground mt-1">Visão consolidada dos beneficiários cadastrados.</p>
+      <header className="flex flex-wrap items-end justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-display font-bold">Painel geral</h1>
+          <p className="text-muted-foreground mt-1">Visão consolidada dos beneficiários cadastrados.</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => backupExcel().then((n) => n && toast.success(`Excel baixado · ${n} registros`))}>
+            <FileSpreadsheet className="size-4" /> Excel completo
+          </Button>
+          <Button variant="outline" onClick={() => backupPdf().then((n) => n && toast.success(`PDF baixado · ${n} registros`))}>
+            <FileType2 className="size-4" /> PDF completo
+          </Button>
+          <Button onClick={runFullBackup}>
+            <Download className="size-4" /> Backup semanal
+          </Button>
+        </div>
       </header>
 
+      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((s) => {
           const Icon = s.icon;
@@ -55,7 +171,7 @@ function Dashboard() {
                 <Icon className="size-5" />
               </div>
               <div className="mt-4">
-                <div className="text-3xl font-display font-bold">{s.value}</div>
+                <div className="text-3xl font-display font-bold">{isLoading ? "…" : s.value}</div>
                 <div className="text-sm text-muted-foreground mt-1">{s.label}</div>
               </div>
             </Card>
@@ -63,6 +179,117 @@ function Dashboard() {
         })}
       </div>
 
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-8">
+        <Card className="p-5 lg:col-span-2">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display font-semibold">Distribuição por escolaridade</h2>
+            <TrendingUp className="size-4 text-muted-foreground" />
+          </div>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={porEscolaridade} margin={{ top: 10, right: 10, left: -20, bottom: 30 }}>
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-20} textAnchor="end" height={50} />
+                <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="value" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="font-display font-semibold mb-4">Classe de risco</h2>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={porRisco} dataKey="value" nameKey="name" innerRadius={45} outerRadius={80} paddingAngle={2}>
+                  {porRisco.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="font-display font-semibold mb-4">Top bairros</h2>
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={porBairro} layout="vertical" margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={80} />
+                <Tooltip />
+                <Bar dataKey="value" fill="#10b981" radius={[0, 6, 6, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="font-display font-semibold mb-4">Por turno</h2>
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={porTurno} dataKey="value" nameKey="name" outerRadius={75}>
+                  {porTurno.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="font-display font-semibold mb-4">Desligamentos por ano</h2>
+          <div className="h-56">
+            {desligData.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-sm text-muted-foreground">Sem desligamentos registrados.</div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={desligData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                  <XAxis dataKey="ano" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="total" fill="#ef4444" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </Card>
+      </div>
+
+      {/* Quick reports */}
+      <Card className="mt-8 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="font-display font-semibold text-lg">Relatórios rápidos</h2>
+            <p className="text-sm text-muted-foreground">Gere um relatório formatado com 1 clique.</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {quickReports.map((q) => (
+            <div key={q.title} className="border rounded-lg p-3 flex items-center justify-between gap-3 hover:bg-muted/30 transition-colors">
+              <div className="min-w-0">
+                <div className="font-medium text-sm truncate">{q.title}</div>
+                <div className="text-xs text-muted-foreground">PDF ou Excel</div>
+              </div>
+              <div className="flex gap-1 shrink-0">
+                <Button size="sm" variant="outline" onClick={() => runQuick(q, "pdf")}>
+                  <FileType2 className="size-3.5" />
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => runQuick(q, "xlsx")}>
+                  <FileSpreadsheet className="size-3.5" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Recent */}
       <Card className="mt-8 overflow-hidden">
         <div className="flex items-center justify-between p-5 border-b">
           <h2 className="text-lg font-display font-semibold">Cadastros recentes</h2>
@@ -71,7 +298,7 @@ function Dashboard() {
           </Link>
         </div>
         <div className="divide-y">
-          {(data?.recentes ?? []).map((b: any) => (
+          {recentes.map((b: any) => (
             <Link
               key={b.id}
               to="/beneficiarios/$id"
