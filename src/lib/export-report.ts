@@ -211,7 +211,7 @@ export async function exportDocx(d: ReportData) {
           new TableCell({
             borders,
             shading: { fill: "2563EB", type: "clear", color: "auto" } as any,
-            children: [new Paragraph({ children: [new TextRun({ text: c, bold: true, color: "FFFFFF" })] })],
+            children: [new Paragraph({ children: [new TextRun({ text: labelOf(c), bold: true, color: "FFFFFF" })] })],
           })
         ),
       });
