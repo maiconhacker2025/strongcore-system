@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Check, RotateCcw, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 export type Beneficiario = Record<string, any>;
 
-type Field = { name: string; label: string; type?: "text" | "date" | "number" | "textarea" | "bool"; full?: boolean };
+type Field = { name: string; label: string; type?: "text" | "date" | "number" | "textarea" | "bool"; full?: boolean; suggest?: boolean };
 
 const sections: { title: string; fields: Field[] }[] = [
   {
@@ -35,8 +36,8 @@ const sections: { title: string; fields: Field[] }[] = [
       { name: "data_desligamento_02", label: "Desligamento 02", type: "date" },
       { name: "data_ingresso_03", label: "Ingresso 03", type: "date" },
       { name: "data_desligamento_03", label: "Desligamento 03", type: "date" },
-      { name: "assistente_social", label: "Assistente social" },
-      { name: "psicologa", label: "Psicóloga" },
+      { name: "assistente_social", label: "Assistente social", suggest: true },
+      { name: "psicologa", label: "Psicóloga", suggest: true },
     ],
   },
   {
@@ -161,6 +162,30 @@ export function BeneficiarioForm({
   });
   const [stats, setStats] = useState<OrderStats>(() => loadOrder());
   const sessionSeq = useRef<string[]>([]);
+  const [suggestions, setSuggestions] = useState<Record<string, string[]>>({});
+
+  useEffect(() => {
+    let cancel = false;
+    (async () => {
+      const cols = ["psicologa", "assistente_social"];
+      const out: Record<string, string[]> = {};
+      for (const col of cols) {
+        const { data } = await supabase
+          .from("beneficiarios")
+          .select(col)
+          .not(col, "is", null)
+          .limit(1000);
+        const set = new Set<string>();
+        (data ?? []).forEach((r: any) => {
+          const v = (r?.[col] ?? "").toString().trim();
+          if (v) set.add(v);
+        });
+        out[col] = [...set].sort((a, b) => a.localeCompare(b, "pt-BR"));
+      }
+      if (!cancel) setSuggestions(out);
+    })();
+    return () => { cancel = true; };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("form-adaptive", adaptive ? "on" : "off");
@@ -281,11 +306,17 @@ export function BeneficiarioForm({
                   <Label htmlFor={f.name} className="flex items-center gap-2">
                     {filled && <Check className="size-3.5 text-success" />}
                     {f.label}
+                    {f.suggest && suggestions[f.name]?.length ? (
+                      <span className="text-[10px] text-muted-foreground font-normal">
+                        ({suggestions[f.name].length} sugestões)
+                      </span>
+                    ) : null}
                   </Label>
                   <Input
                     id={f.name}
                     type={f.type ?? "text"}
                     value={v ?? ""}
+                    list={f.suggest ? `${f.name}-suggestions` : undefined}
                     onFocus={() => trackFocus(f.name)}
                     onChange={(e) => {
                       const raw = e.target.value;
@@ -293,6 +324,13 @@ export function BeneficiarioForm({
                       else set(f.name, raw || null);
                     }}
                   />
+                  {f.suggest && suggestions[f.name] && (
+                    <datalist id={`${f.name}-suggestions`}>
+                      {suggestions[f.name].map((s) => (
+                        <option key={s} value={s} />
+                      ))}
+                    </datalist>
+                  )}
                 </div>
               );
             })}

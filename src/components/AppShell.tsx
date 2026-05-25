@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { QuickSearch } from "@/components/QuickSearch";
 import { Button } from "@/components/ui/button";
 import { runFullBackup, daysSinceBackup } from "@/lib/backup";
+import { AuthGate, LogoutButton } from "@/components/AuthGate";
 import logo from "@/assets/logo-progredir.jpg";
 import { useEffect, useState } from "react";
 
@@ -31,6 +32,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
+    <AuthGate>
     <div className="min-h-screen flex bg-background">
       <aside className="hidden md:flex w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
         <div className="px-6 py-6 border-b border-sidebar-border bg-white/95">
@@ -82,6 +84,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <p className="text-[11px] opacity-70 text-center">
             {days === null ? "Nenhum backup ainda" : days === 0 ? "Backup feito hoje ✓" : `Último backup há ${days} dia(s)`}
           </p>
+          <div className="pt-1 flex justify-center">
+            <LogoutButton />
+          </div>
         </div>
       </aside>
 
@@ -92,5 +97,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex-1 min-w-0">{children}</div>
       </main>
     </div>
+    </AuthGate>
   );
 }
