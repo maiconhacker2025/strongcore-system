@@ -218,22 +218,167 @@ function Dashboard() {
       </header>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map((s) => {
           const Icon = s.icon;
           return (
-            <Card key={s.label} className="p-5">
-              <div className={`size-10 rounded-xl flex items-center justify-center ${s.color}`}>
-                <Icon className="size-5" />
+            <Card key={s.label} className="p-4">
+              <div className={`size-9 rounded-xl flex items-center justify-center ${s.color}`}>
+                <Icon className="size-4" />
               </div>
-              <div className="mt-4">
-                <div className="text-3xl font-display font-bold">{isLoading ? "…" : s.value}</div>
-                <div className="text-sm text-muted-foreground mt-1">{s.label}</div>
+              <div className="mt-3">
+                <div className="text-2xl font-display font-bold leading-tight">{isLoading ? "…" : s.value}</div>
+                <div className="text-xs text-muted-foreground mt-1">{s.label}</div>
+                {(s as any).hint && <div className="text-[11px] text-muted-foreground/70 mt-0.5">{(s as any).hint}</div>}
               </div>
             </Card>
           );
         })}
       </div>
+
+      {/* Destaques: Aniversariantes + Alertas */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
+        <Card className="p-5 lg:col-span-2">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-display font-semibold flex items-center gap-2">
+              <Cake className="size-5 text-purple-600" /> Aniversariantes do mês
+            </h2>
+            <span className="text-xs text-muted-foreground">{aniversariantes.length} pessoa(s)</span>
+          </div>
+          {aniversariantes.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">Nenhum aniversariante este mês.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto">
+              {aniversariantes.slice(0, 10).map((a) => (
+                <Link key={a.id} to="/beneficiarios/$id" params={{ id: a.id }}
+                  className="flex items-center gap-3 p-2 rounded-lg border hover:bg-muted/50 transition-colors">
+                  <div className="size-9 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-semibold text-sm">
+                    {String(a._day).padStart(2, "0")}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium truncate">{a.nome}</div>
+                    <div className="text-xs text-muted-foreground">Faz {a._age + 1} anos</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
+            <HeartPulse className="size-5 text-rose-600" /> Alertas de saúde
+          </h2>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-2 rounded-lg bg-amber-50">
+              <div className="flex items-center gap-2 text-sm">
+                <Pill className="size-4 text-amber-700" /> Usa medicação
+              </div>
+              <span className="font-bold text-amber-700">{comMedicacao}</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-lg bg-rose-50">
+              <div className="flex items-center gap-2 text-sm">
+                <AlertTriangle className="size-4 text-rose-700" /> Possui alergia
+              </div>
+              <span className="font-bold text-rose-700">{comAlergia}</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-lg bg-orange-50">
+              <div className="flex items-center gap-2 text-sm">
+                <PhoneOff className="size-4 text-orange-700" /> Sem contato
+              </div>
+              <span className="font-bold text-orange-700">{semContato}</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-lg bg-red-50">
+              <div className="flex items-center gap-2 text-sm">
+                <AlertTriangle className="size-4 text-red-700" /> Risco alto
+              </div>
+              <span className="font-bold text-red-700">{risco}</span>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Faixa etária + Gênero + Top escolas */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+        <Card className="p-5">
+          <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
+            <UsersRound className="size-4 text-primary" /> Faixa etária
+          </h2>
+          <div className="h-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={faixas} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="value" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="font-display font-semibold mb-3">Gênero</h2>
+          <div className="h-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={porGenero} dataKey="value" nameKey="name" innerRadius={35} outerRadius={70} paddingAngle={2}>
+                  {porGenero.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
+            <School className="size-4 text-emerald-600" /> Top escolas (ativos)
+          </h2>
+          {topEscolas.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">Sem dados.</p>
+          ) : (
+            <div className="space-y-2">
+              {topEscolas.map((e, i) => {
+                const max = topEscolas[0].value || 1;
+                return (
+                  <div key={e.name}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="truncate font-medium">{e.name}</span>
+                      <span className="text-muted-foreground">{e.value}</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full rounded-full" style={{ width: `${(e.value / max) * 100}%`, background: COLORS[i % COLORS.length] }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Card>
+      </div>
+
+      {/* Ingressos por ano */}
+      <Card className="p-5 mt-4">
+        <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
+          <CalendarCheck2 className="size-4 text-blue-600" /> Ingressos por ano (últimos)
+        </h2>
+        <div className="h-48">
+          {ingressoData.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-sm text-muted-foreground">Sem ingressos registrados.</div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={ingressoData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                <XAxis dataKey="ano" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="total" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </Card>
+
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-8">
