@@ -63,10 +63,15 @@ async function runTool(name: string, args: any): Promise<any> {
       return { count: count ?? 0 };
     }
     if (action === "list") {
+      const DEFAULT_FIELDS = [
+        "codigo", "nome", "data_nascimento", "genero", "classe_risco", "ativo",
+        "escolaridade", "turno", "escola", "bairro", "responsavel", "nome_mae",
+        "celular", "whatsapp",
+      ];
       const fields: string[] = Array.isArray(args?.fields) && args.fields.length
         ? args.fields.filter((c: string) => ALLOWED_SET.has(c))
-        : ["codigo", "nome", "ativo", "classe_risco", "escola", "bairro"];
-      const limit = Math.min(Math.max(Number(args?.limit) || 50, 1), 500);
+        : DEFAULT_FIELDS;
+      const limit = Math.min(Math.max(Number(args?.limit) || 200, 1), 1000);
       let q = supabaseAdmin.from("beneficiarios").select(fields.join(","));
       q = applyFilters(q, filters);
       q = q.order("nome", { ascending: true }).limit(limit);
