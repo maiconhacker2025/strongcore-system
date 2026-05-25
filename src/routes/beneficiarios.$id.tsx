@@ -39,7 +39,7 @@ function EditPage() {
   const saveMut = useMutation({
     mutationFn: async (payload: Beneficiario) => {
       const { id: _id, created_at, updated_at, ...rest } = payload;
-      const { error } = await supabase.from("beneficiarios").update(rest).eq("id", id);
+      const { error } = await supabase.from("beneficiarios").update(rest as any).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
