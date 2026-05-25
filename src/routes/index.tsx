@@ -6,7 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Users, UserCheck, AlertTriangle, GraduationCap, ArrowRight,
-  FileSpreadsheet, FileType2, Download, TrendingUp,
+  FileSpreadsheet, FileType2, Download, TrendingUp, Cake, HeartPulse,
+  Pill, PhoneOff, School, CalendarCheck2, MapPin, UsersRound,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip,
