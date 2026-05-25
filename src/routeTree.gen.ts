@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BeneficiariosIndexRouteImport } from './routes/beneficiarios.index'
+import { Route as BeneficiariosNovoRouteImport } from './routes/beneficiarios.novo'
 import { Route as BeneficiariosIdRouteImport } from './routes/beneficiarios.$id'
 
 const LoginRoute = LoginRouteImport.update({
@@ -29,6 +30,11 @@ const BeneficiariosIndexRoute = BeneficiariosIndexRouteImport.update({
   path: '/beneficiarios/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BeneficiariosNovoRoute = BeneficiariosNovoRouteImport.update({
+  id: '/beneficiarios/novo',
+  path: '/beneficiarios/novo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BeneficiariosIdRoute = BeneficiariosIdRouteImport.update({
   id: '/beneficiarios/$id',
   path: '/beneficiarios/$id',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
+  '/beneficiarios/novo': typeof BeneficiariosNovoRoute
   '/beneficiarios/': typeof BeneficiariosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
+  '/beneficiarios/novo': typeof BeneficiariosNovoRoute
   '/beneficiarios': typeof BeneficiariosIndexRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,38 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
+  '/beneficiarios/novo': typeof BeneficiariosNovoRoute
   '/beneficiarios/': typeof BeneficiariosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/beneficiarios/$id' | '/beneficiarios/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/beneficiarios/$id'
+    | '/beneficiarios/novo'
+    | '/beneficiarios/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/beneficiarios/$id' | '/beneficiarios'
-  id: '__root__' | '/' | '/login' | '/beneficiarios/$id' | '/beneficiarios/'
+  to:
+    | '/'
+    | '/login'
+    | '/beneficiarios/$id'
+    | '/beneficiarios/novo'
+    | '/beneficiarios'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/beneficiarios/$id'
+    | '/beneficiarios/novo'
+    | '/beneficiarios/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   BeneficiariosIdRoute: typeof BeneficiariosIdRoute
+  BeneficiariosNovoRoute: typeof BeneficiariosNovoRoute
   BeneficiariosIndexRoute: typeof BeneficiariosIndexRoute
 }
 
@@ -92,6 +118,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BeneficiariosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/beneficiarios/novo': {
+      id: '/beneficiarios/novo'
+      path: '/beneficiarios/novo'
+      fullPath: '/beneficiarios/novo'
+      preLoaderRoute: typeof BeneficiariosNovoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/beneficiarios/$id': {
       id: '/beneficiarios/$id'
       path: '/beneficiarios/$id'
@@ -106,8 +139,19 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   BeneficiariosIdRoute: BeneficiariosIdRoute,
+  BeneficiariosNovoRoute: BeneficiariosNovoRoute,
   BeneficiariosIndexRoute: BeneficiariosIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
