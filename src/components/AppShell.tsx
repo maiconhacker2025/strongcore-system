@@ -1,11 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Users, LayoutDashboard, UserPlus, Heart } from "lucide-react";
+import { Users, LayoutDashboard, UserPlus, Heart, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/", label: "Painel", icon: LayoutDashboard },
   { to: "/beneficiarios", label: "Beneficiários", icon: Users },
   { to: "/beneficiarios/novo", label: "Cadastrar", icon: UserPlus },
+  { to: "/ia", label: "Assistente IA", icon: Sparkles },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
