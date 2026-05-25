@@ -25,7 +25,7 @@ function ListPage() {
     queryFn: async () => {
       let query = supabase
         .from("beneficiarios")
-        .select("id, nome, codigo, bairro, escola, escolaridade, ativo, classe_risco, data_nascimento, celular, whatsapp")
+        .select("id, nome, codigo, bairro, escola, escolaridade, ativo, classe_risco, data_nascimento, celular, whatsapp, genero, turno, nome_mae, responsavel")
         .order("nome", { ascending: true })
         .limit(500);
       if (q.trim()) query = query.ilike("nome", `%${q.trim()}%`);
@@ -83,20 +83,32 @@ function ListPage() {
               <tr className="text-left">
                 <th className="px-4 py-3 font-semibold">Nome</th>
                 <th className="px-4 py-3 font-semibold">Cód.</th>
+                <th className="px-4 py-3 font-semibold">Idade</th>
+                <th className="px-4 py-3 font-semibold">Gênero</th>
+                <th className="px-4 py-3 font-semibold">Escolaridade</th>
+                <th className="px-4 py-3 font-semibold">Turno</th>
                 <th className="px-4 py-3 font-semibold">Escola</th>
                 <th className="px-4 py-3 font-semibold">Bairro</th>
+                <th className="px-4 py-3 font-semibold">Responsável</th>
+                <th className="px-4 py-3 font-semibold">Contato</th>
                 <th className="px-4 py-3 font-semibold">Risco</th>
                 <th className="px-4 py-3 font-semibold">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {isLoading && (
-                <tr><td colSpan={6} className="text-center py-10 text-muted-foreground">Carregando...</td></tr>
+                <tr><td colSpan={12} className="text-center py-10 text-muted-foreground">Carregando...</td></tr>
               )}
               {!isLoading && data?.length === 0 && (
-                <tr><td colSpan={6} className="text-center py-10 text-muted-foreground">Nenhum beneficiário encontrado.</td></tr>
+                <tr><td colSpan={12} className="text-center py-10 text-muted-foreground">Nenhum beneficiário encontrado.</td></tr>
               )}
-              {data?.map((b: any) => (
+              {data?.map((b: any) => {
+                const idade = b.data_nascimento
+                  ? Math.floor((Date.now() - new Date(b.data_nascimento).getTime()) / (365.25 * 24 * 3600 * 1000))
+                  : null;
+                const contato = b.whatsapp || b.celular || "—";
+                const resp = b.responsavel || b.nome_mae || "—";
+                return (
                 <tr key={b.id} className="hover:bg-muted/40 transition-colors">
                   <td className="px-4 py-3">
                     <Link to="/beneficiarios/$id" params={{ id: b.id }} className="font-medium text-foreground hover:text-primary">
@@ -104,8 +116,14 @@ function ListPage() {
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{b.codigo ?? "—"}</td>
-                  <td className="px-4 py-3 text-muted-foreground truncate max-w-[200px]">{b.escola ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{idade !== null ? `${idade}a` : "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{b.genero ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground truncate max-w-[140px]">{b.escolaridade ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{b.turno ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground truncate max-w-[180px]">{b.escola ?? "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{b.bairro ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground truncate max-w-[140px]">{resp}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{contato}</td>
                   <td className="px-4 py-3">
                     {b.classe_risco === "Alto" && <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-medium">Alto</span>}
                     {b.classe_risco === "Médio" && <span className="text-xs px-2 py-0.5 rounded-full bg-warning/20 text-warning-foreground font-medium">Médio</span>}
@@ -120,7 +138,8 @@ function ListPage() {
                     )}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
