@@ -19,13 +19,50 @@ function today() {
   return new Date().toLocaleDateString("pt-BR");
 }
 
+const COLUMN_LABELS: Record<string, string> = {
+  codigo: "Código", nome: "Nome", data_nascimento: "Nascimento", genero: "Gênero",
+  classe_risco: "Risco", ativo: "Status", escolaridade: "Escolaridade", turno: "Turno",
+  escola: "Escola", bairro: "Bairro", rua: "Rua", cep: "CEP", estado: "UF",
+  responsavel: "Responsável", nome_mae: "Mãe", nome_pai: "Pai", mora_com: "Mora com",
+  celular: "Celular", whatsapp: "WhatsApp", email: "E-mail",
+  data_ingresso_01: "Ingresso", data_desligamento_01: "Desligamento",
+  renda: "Renda", possui_beneficios: "Benefícios", alergia: "Alergia",
+  medicacao: "Medicação", numero_irmaos: "Nº irmãos", profissao_mae: "Profissão (mãe)",
+  profissao_pai: "Profissão (pai)", idade: "Idade", total: "Total", valor: "Valor",
+};
+
+function labelOf(col: string) {
+  return COLUMN_LABELS[col] ?? col.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function calcAge(dob: string | null | undefined): string {
+  if (!dob) return "—";
+  const d = new Date(dob);
+  if (isNaN(d.getTime())) return "—";
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  if (now.getMonth() < d.getMonth() || (now.getMonth() === d.getMonth() && now.getDate() < d.getDate())) age--;
+  return `${age} anos`;
+}
+
+function formatCell(col: string, v: any) {
+  if (v === null || v === undefined || v === "") return "—";
+  if (col === "ativo") return v ? "Ativo" : "Inativo";
+  if (typeof v === "boolean") return v ? "Sim" : "Não";
+  if (col === "data_nascimento") {
+    const age = calcAge(String(v));
+    const d = new Date(String(v));
+    if (!isNaN(d.getTime())) return `${d.toLocaleDateString("pt-BR")} (${age})`;
+  }
+  if (/^data_/.test(col)) {
+    const d = new Date(String(v));
+    if (!isNaN(d.getTime())) return d.toLocaleDateString("pt-BR");
+  }
+  return String(v);
+}
+
 function rowToValues(row: any, cols: string[]) {
-  return cols.map((c) => {
-    const v = row?.[c];
-    if (v === null || v === undefined || v === "") return "—";
-    if (typeof v === "boolean") return v ? "Sim" : "Não";
-    return String(v);
-  });
+  return cols.map((c) => formatCell(c, row?.[c]));
 }
 
 function stripMd(s: string) {
@@ -89,11 +126,12 @@ export async function exportPdf(d: ReportData) {
       y += 8;
       autoTable(doc, {
         startY: y + 4,
-        head: [t.columns],
+        head: [t.columns.map(labelOf)],
         body: t.rows.map((r) => rowToValues(r, t.columns)),
-        styles: { fontSize: 9, cellPadding: 4 },
-        headStyles: { fillColor: [37, 99, 235], textColor: 255 },
-        margin: { left: 40, right: 40 },
+        styles: { fontSize: 8, cellPadding: 3, overflow: "linebreak" },
+        headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: "bold" },
+        alternateRowStyles: { fillColor: [245, 247, 250] },
+        margin: { left: 30, right: 30 },
       });
       y = (doc as any).lastAutoTable.finalY + 20;
     }
@@ -123,9 +161,9 @@ export async function exportXlsx(d: ReportData) {
     XLSX.utils.book_append_sheet(wb, ws, "Resumo");
 
     d.tables.forEach((t, i) => {
-      const body = [t.columns, ...t.rows.map((r) => rowToValues(r, t.columns))];
+      const body = [t.columns.map(labelOf), ...t.rows.map((r) => rowToValues(r, t.columns))];
       const s = XLSX.utils.aoa_to_sheet(body);
-      s["!cols"] = t.columns.map(() => ({ wch: 22 }));
+      s["!cols"] = t.columns.map((c) => ({ wch: c === "nome" ? 32 : c === "escola" ? 28 : 18 }));
       const safeName = (t.title || `Tabela ${i + 1}`)
         .replace(/[\\\/\?\*\[\]:]/g, " ")
         .slice(0, 28);
@@ -173,7 +211,7 @@ export async function exportDocx(d: ReportData) {
           new TableCell({
             borders,
             shading: { fill: "2563EB", type: "clear", color: "auto" } as any,
-            children: [new Paragraph({ children: [new TextRun({ text: c, bold: true, color: "FFFFFF" })] })],
+            children: [new Paragraph({ children: [new TextRun({ text: labelOf(c), bold: true, color: "FFFFFF" })] })],
           })
         ),
       });

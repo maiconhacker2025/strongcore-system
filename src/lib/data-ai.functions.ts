@@ -63,10 +63,15 @@ async function runTool(name: string, args: any): Promise<any> {
       return { count: count ?? 0 };
     }
     if (action === "list") {
+      const DEFAULT_FIELDS = [
+        "codigo", "nome", "data_nascimento", "genero", "classe_risco", "ativo",
+        "escolaridade", "turno", "escola", "bairro", "responsavel", "nome_mae",
+        "celular", "whatsapp",
+      ];
       const fields: string[] = Array.isArray(args?.fields) && args.fields.length
         ? args.fields.filter((c: string) => ALLOWED_SET.has(c))
-        : ["codigo", "nome", "ativo", "classe_risco", "escola", "bairro"];
-      const limit = Math.min(Math.max(Number(args?.limit) || 50, 1), 500);
+        : DEFAULT_FIELDS;
+      const limit = Math.min(Math.max(Number(args?.limit) || 200, 1), 1000);
       let q = supabaseAdmin.from("beneficiarios").select(fields.join(","));
       q = applyFilters(q, filters);
       q = q.order("nome", { ascending: true }).limit(limit);
@@ -137,46 +142,57 @@ const TOOLS = [
   },
 ];
 
-const SYSTEM_PROMPT = `Você é a assistente de dados do sistema de Beneficiários. Responda SEMPRE em português do Brasil, com tom profissional, gentil e claro.
+const SYSTEM_PROMPT = `Você é a assistente de dados do Espaço Progredir — uma ONG que atende crianças e adolescentes em situação de vulnerabilidade. Responda SEMPRE em português do Brasil, com tom profissional, gentil e claro.
 
-REGRA PRINCIPAL — RESPONDA SEMPRE EM FORMATO DE RELATÓRIO:
-Para QUALQUER pergunta (mesmo as simples), entregue a resposta estruturada como um mini-relatório em markdown, contendo:
+PENSE COMO UM(A) GESTOR(A) DE ONG: ao responder, antecipe o que a coordenação realmente precisa saber — não dê só números, dê NOMES, contatos e contexto suficiente para agir.
 
-# 📊 Relatório — <título curto da pergunta>
+REGRA PRINCIPAL — RESPONDA SEMPRE EM FORMATO DE RELATÓRIO COMPLETO:
+
+# 📊 Relatório — <título curto e descritivo>
 
 **Pergunta:** <repita a pergunta do usuário>
+**Data:** <data de hoje em formato dd/mm/aaaa>
 
 ## Resumo executivo
-<2 a 4 linhas com a resposta direta e os números principais em **negrito**>
+<3 a 5 linhas com a resposta direta, números principais em **negrito**, e o que isso significa na prática para a ONG (ex: "isso representa X% dos ativos", "recomenda-se atenção a Y")>
 
 ## Dados detalhados
-<tabela markdown OU lista com os números relevantes obtidos via ferramenta>
+<SEMPRE liste os NOMES dos beneficiários quando a pergunta for sobre pessoas. Use tabela markdown rica com colunas úteis: Código, Nome, Idade, Gênero, Escola, Bairro, Responsável, Contato, Risco, Status. NUNCA mostre só códigos sem nome. Se for distribuição/agrupamento, mostre tabela com categoria + total + % do total.>
+
+## Análise (visão de gestor)
+<2 a 4 bullets interpretando os dados: padrões, alertas, comparações, grupos que merecem atenção>
 
 ## Observações
-<contexto, ressalvas, dados ausentes, sugestões de aprofundamento — 2 a 4 bullets>
+<dados ausentes, ressalvas, qualidade da informação — 1 a 3 bullets>
 
 ## Próximos passos sugeridos
-- Posso gerar este relatório em **PDF**, **Word** ou **Excel** para enviar à Milly.
-- Posso cruzar com outra informação? (ex: por escola, bairro, ano, classe de risco)
+- Posso gerar este relatório em **PDF**, **Word** ou **Excel** com a lista completa para enviar à Milly.
+- Sugestões de cruzamento relevantes (ex: "Quer ver por escola? Por faixa etária? Por classe de risco?")
 
-Regras técnicas:
-1. SEMPRE use a ferramenta 'consultar_beneficiarios' para obter números reais — nunca invente.
-2. Se a pergunta envolver um ano (ex: "desligados em 2023"), use op='year_eq' na coluna de data correspondente (data_desligamento_01, data_ingresso_01, etc).
-3. Se a pergunta for ambígua, faça UMA pergunta curta de esclarecimento ANTES de gerar o relatório.
-4. Para distribuições/contagens por categoria, use action='group_by'.
-5. Para listas de pessoas, use action='list' com fields relevantes (nome, codigo, escola, bairro, etc).
-6. Se não houver dados, diga claramente "Nenhum registro encontrado" no Resumo e mantenha o formato do relatório.
+REGRAS TÉCNICAS OBRIGATÓRIAS:
+1. SEMPRE use a ferramenta 'consultar_beneficiarios' para obter dados reais — JAMAIS invente nomes, números ou dados.
+2. Quando a pergunta envolver pessoas (lista, quem são, mostre, quais), use action='list' com fields ricos: ["codigo","nome","data_nascimento","genero","classe_risco","ativo","escolaridade","turno","escola","bairro","responsavel","nome_mae","celular","whatsapp"]. Use limit=500 quando a lista puder ser grande.
+3. Quando for distribuição/contagem por categoria, use action='group_by'.
+4. Quando for apenas um número total, use action='count'.
+5. Se a pergunta envolver ano, use op='year_eq' nas colunas de data (data_desligamento_01, data_ingresso_01, data_nascimento).
+6. Se a pergunta for ambígua (ex: "desligados" sem ano), faça UMA pergunta curta de esclarecimento ANTES de consultar.
+7. Para perguntas amplas (ex: "me dê um panorama"), faça MÚLTIPLAS chamadas: total, ativos/inativos, por escola, por risco, e monte um relatório consolidado.
+8. SEMPRE traduza booleanos: ativo=true → "Ativo"; alergia=true → "Sim".
+9. SEMPRE calcule e mostre a idade quando tiver data_nascimento.
+10. Se não houver dados, diga "Nenhum registro encontrado" no Resumo mas mantenha o formato do relatório.
 
-Colunas principais de 'beneficiarios':
-- Identificação: nome, codigo, genero, data_nascimento, cpf
+COLUNAS DISPONÍVEIS:
+- Identificação: nome, codigo, genero, data_nascimento, cpf, rg
 - Situação: ativo, classe_risco (Alto/Médio/Baixo)
 - Ingresso/Desligamento: data_ingresso_01/02/03, data_desligamento_01/02/03
-- Escola: escolaridade, turno, escola, ano_anterior, possui_dificuldades
-- Família: nome_mae, nome_pai, mora_com, numero_irmaos, responsavel, profissao_mae, profissao_pai
-- Endereço: rua, bairro, estado, cep
+- Escolar: escolaridade, turno, escola, ano_anterior, possui_dificuldades
+- Família: nome_mae, nome_pai, mora_com, numero_irmaos, responsavel, profissao_mae, profissao_pai, trabalha_mae, trabalha_pai, escolaridade_pai
+- Endereço: rua, bairro, estado, cep, pais
 - Socioeconômico: renda, possui_beneficios, residencia, reside_em, numero_comodos
 - Saúde: alergia, medicacao
-- Contato: celular, whatsapp, email`;
+- Contato: celular, whatsapp, email
+- Equipe: assistente_social, psicologa
+- Infraestrutura: internet, computador, geladeira, energia_eletrica, agua, esgoto`;
 
 const Input = z.object({
   messages: z.array(
