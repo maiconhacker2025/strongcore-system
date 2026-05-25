@@ -210,30 +210,94 @@ function DataTable({ table }: { table: ReportTable }) {
 }
 
 function ExportMenu({ question, answer, tables }: { question: string; answer: string; tables: ReportTable[] }) {
-  const data = {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState<null | "pdf" | "docx" | "xlsx">(null);
+  const data: ReportData = {
     title: `Relatório — ${question.slice(0, 60)}`,
     question,
     answer,
     tables,
   };
+
+  const totalRows = tables.reduce((acc, t) => acc + t.rows.length, 0);
+
+  const run = async (fmt: "pdf" | "docx" | "xlsx") => {
+    setBusy(fmt);
+    try {
+      if (fmt === "pdf") await exportPdf(data);
+      if (fmt === "docx") await exportDocx(data);
+      if (fmt === "xlsx") await exportXlsx(data);
+      setTimeout(() => setOpen(false), 400);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const formats: { id: "pdf" | "docx" | "xlsx"; label: string; desc: string; Icon: any; color: string }[] = [
+    { id: "pdf",  label: "PDF",   desc: "Pronto para imprimir ou enviar por e-mail", Icon: FileType2,       color: "bg-red-500/10 text-red-600" },
+    { id: "docx", label: "Word",  desc: "Editável no Word / Google Docs (.docx)",     Icon: FileText,        color: "bg-blue-500/10 text-blue-600" },
+    { id: "xlsx", label: "Excel", desc: "Planilha com todas as tabelas (.xlsx)",      Icon: FileSpreadsheet, color: "bg-emerald-500/10 text-emerald-600" },
+  ];
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Download className="size-4" /> Exportar relatório
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setTimeout(() => exportPdf(data), 0); }}>
-          <FileType2 className="size-4" /> PDF
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setTimeout(() => exportDocx(data), 0); }}>
-          <FileText className="size-4" /> Word (.docx)
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setTimeout(() => exportXlsx(data), 0); }}>
-          <FileSpreadsheet className="size-4" /> Excel (.xlsx)
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <Card className="p-3 w-full bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2 text-sm">
+            <div className="size-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center">
+              <FileBarChart2 className="size-4" />
+            </div>
+            <div>
+              <p className="font-semibold leading-tight">Relatório pronto para Milly</p>
+              <p className="text-xs text-muted-foreground">
+                {tables.length} tabela(s) · {totalRows} registro(s)
+              </p>
+            </div>
+          </div>
+          <Button onClick={() => setOpen(true)} size="sm" className="shadow-md">
+            <FileBarChart2 className="size-4" /> Gerar Relatório
+          </Button>
+        </div>
+      </Card>
+
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <FileBarChart2 className="size-5 text-primary" /> Gerar relatório completo
+          </DialogTitle>
+          <DialogDescription>
+            Escolha o formato. O arquivo incluirá a pergunta, a resposta da IA e todas as tabelas com {totalRows} registro(s).
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid gap-2 py-2">
+          {formats.map((f) => {
+            const isBusy = busy === f.id;
+            return (
+              <button
+                key={f.id}
+                disabled={!!busy}
+                onClick={() => run(f.id)}
+                className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-muted/60 transition-colors text-left disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                <div className={`size-10 rounded-lg flex items-center justify-center ${f.color}`}>
+                  <f.Icon className="size-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm">{f.label}</p>
+                  <p className="text-xs text-muted-foreground">{f.desc}</p>
+                </div>
+                {isBusy ? <Loader2 className="size-4 animate-spin text-primary" />
+                  : <CheckCircle2 className="size-4 text-muted-foreground/40" />}
+              </button>
+            );
+          })}
+        </div>
+
+        <p className="text-xs text-muted-foreground border-t pt-3">
+          💡 Dica: você pode pedir à IA para refinar a pergunta antes (ex: filtrar por ano, escola ou bairro) e gerar um relatório ainda mais específico.
+        </p>
+      </DialogContent>
+    </Dialog>
   );
 }
