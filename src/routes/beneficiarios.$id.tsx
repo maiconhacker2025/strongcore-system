@@ -94,7 +94,16 @@ function EditPage() {
             Código {form.codigo ?? "—"} · {form.ativo ? "Ativo" : "Inativo"}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            variant={form.ativo ? "outline" : "default"}
+            onClick={() => toggleAtivoMut.mutate(!form.ativo)}
+            disabled={toggleAtivoMut.isPending}
+          >
+            {toggleAtivoMut.isPending ? <Loader2 className="size-4 animate-spin" />
+              : form.ativo ? <><UserMinus className="size-4" /> Inativar</>
+              : <><UserCheck className="size-4" /> Ativar</>}
+          </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" className="text-destructive hover:text-destructive">
