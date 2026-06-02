@@ -6,8 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Lock, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/logo-progredir.jpg";
+import { ensureAccessAccount } from "@/lib/access-account.functions";
 
 const ACCESS_EMAIL = "acesso@progredir.local";
+const ACCESS_PASSWORD = "@adm123";
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
@@ -26,26 +28,20 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  const tryLogin = async (pwd: string) => {
+    return supabase.auth.signInWithPassword({ email: ACCESS_EMAIL, password: pwd });
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!password) return;
     setBusy(true);
     try {
-      let { error } = await supabase.auth.signInWithPassword({
-        email: ACCESS_EMAIL,
-        password,
-      });
-      if (error && /Invalid login credentials/i.test(error.message)) {
-        // First-time setup: create the shared account with this password
-        const { error: signUpErr } = await supabase.auth.signUp({
-          email: ACCESS_EMAIL,
-          password,
-        });
-        if (signUpErr) throw signUpErr;
-        const r = await supabase.auth.signInWithPassword({
-          email: ACCESS_EMAIL,
-          password,
-        });
+      let { error } = await tryLogin(password);
+      if (error && /Invalid login credentials/i.test(error.message) && password === ACCESS_PASSWORD) {
+        // Bootstrap or repair the shared account, then retry once.
+        await ensureAccessAccount();
+        const r = await tryLogin(password);
         error = r.error;
       }
       if (error) throw error;

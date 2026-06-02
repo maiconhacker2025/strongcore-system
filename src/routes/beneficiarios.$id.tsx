@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { BeneficiarioForm, type Beneficiario } from "@/components/BeneficiarioForm";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Loader2, UserCheck, UserMinus } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -61,6 +61,22 @@ function EditPage() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const toggleAtivoMut = useMutation({
+    mutationFn: async (ativo: boolean) => {
+      const { error } = await supabase.from("beneficiarios").update({ ativo }).eq("id", id);
+      if (error) throw error;
+      return ativo;
+    },
+    onSuccess: (ativo) => {
+      toast.success(ativo ? "Beneficiário ativado" : "Beneficiário inativado");
+      setForm((f) => (f ? { ...f, ativo } : f));
+      qc.invalidateQueries({ queryKey: ["beneficiario", id] });
+      qc.invalidateQueries({ queryKey: ["beneficiarios"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-data"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   if (isLoading || !form) {
     return <div className="p-10 flex items-center gap-2 text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Carregando...</div>;
   }
@@ -78,7 +94,16 @@ function EditPage() {
             Código {form.codigo ?? "—"} · {form.ativo ? "Ativo" : "Inativo"}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            variant={form.ativo ? "outline" : "default"}
+            onClick={() => toggleAtivoMut.mutate(!form.ativo)}
+            disabled={toggleAtivoMut.isPending}
+          >
+            {toggleAtivoMut.isPending ? <Loader2 className="size-4 animate-spin" />
+              : form.ativo ? <><UserMinus className="size-4" /> Inativar</>
+              : <><UserCheck className="size-4" /> Ativar</>}
+          </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" className="text-destructive hover:text-destructive">
