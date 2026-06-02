@@ -61,6 +61,22 @@ function EditPage() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const toggleAtivoMut = useMutation({
+    mutationFn: async (ativo: boolean) => {
+      const { error } = await supabase.from("beneficiarios").update({ ativo }).eq("id", id);
+      if (error) throw error;
+      return ativo;
+    },
+    onSuccess: (ativo) => {
+      toast.success(ativo ? "Beneficiário ativado" : "Beneficiário inativado");
+      setForm((f) => (f ? { ...f, ativo } : f));
+      qc.invalidateQueries({ queryKey: ["beneficiario", id] });
+      qc.invalidateQueries({ queryKey: ["beneficiarios"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-data"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   if (isLoading || !form) {
     return <div className="p-10 flex items-center gap-2 text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Carregando...</div>;
   }
