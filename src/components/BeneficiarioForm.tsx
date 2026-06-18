@@ -19,12 +19,22 @@ const sections: { title: string; fields: Field[] }[] = [
     fields: [
       { name: "nome", label: "Nome completo", full: true },
       { name: "codigo", label: "Código", type: "number" },
-      { name: "cpf", label: "CPF" },
-      { name: "rg", label: "RG" },
+      { name: "cpf", label: "CPF (opcional)" },
+      { name: "rg", label: "RG (opcional)" },
       { name: "data_nascimento", label: "Data de nascimento", type: "date" },
       { name: "genero", label: "Gênero" },
       { name: "classe_risco", label: "Classe de risco" },
       { name: "ativo", label: "Beneficiário ativo", type: "bool" },
+    ],
+  },
+  {
+    title: "Certidão de nascimento (quando não houver CPF/RG)",
+    fields: [
+      { name: "num_termo", label: "Nº do termo" },
+      { name: "num_livro", label: "Nº do livro" },
+      { name: "num_folha", label: "Nº da folha" },
+      { name: "circunscricao", label: "Circunscrição / Cartório" },
+      { name: "distrito", label: "Distrito" },
     ],
   },
   {
@@ -108,14 +118,36 @@ const sections: { title: string; fields: Field[] }[] = [
       { name: "residencia", label: "Tipo de residência" },
       { name: "numero_comodos", label: "Nº de cômodos" },
       { name: "possui_banheiro", label: "Possui banheiro" },
-      { name: "possui_geladeira", label: "Possui geladeira" },
       { name: "energia_eletrica", label: "Energia elétrica" },
       { name: "agua", label: "Água" },
       { name: "esgoto", label: "Esgoto" },
       { name: "lixo", label: "Coleta de lixo" },
       { name: "transporte_coletivo", label: "Transporte coletivo" },
       { name: "internet", label: "Internet" },
+    ],
+  },
+  {
+    title: "Itens da casa",
+    fields: [
+      { name: "possui_geladeira", label: "Geladeira" },
+      { name: "fogao", label: "Fogão" },
+      { name: "freezer", label: "Freezer" },
+      { name: "micro_ondas", label: "Micro-ondas" },
+      { name: "filtro", label: "Filtro de água" },
+      { name: "maq_lavar", label: "Máquina de lavar" },
+      { name: "tv", label: "Televisão" },
+      { name: "som", label: "Aparelho de som" },
       { name: "computador", label: "Computador" },
+      { name: "ar_condicionado", label: "Ar-condicionado" },
+      { name: "ventilador", label: "Ventilador" },
+      { name: "cama_casal", label: "Cama de casal" },
+      { name: "cama_filhos", label: "Cama dos filhos" },
+      { name: "guarda_roupas", label: "Guarda-roupas" },
+      { name: "armario_cozinha", label: "Armário de cozinha" },
+      { name: "moveis_estofados", label: "Móveis estofados" },
+      { name: "louca_geral", label: "Louça em geral" },
+      { name: "roupa_cama", label: "Roupa de cama" },
+      { name: "tenis_atividades", label: "Tênis para atividades" },
     ],
   },
   {
@@ -257,14 +289,22 @@ export function BeneficiarioForm({
 
       {orderedSections.map((sec) => {
         const filledCount = sec.fields.filter((f) => isFilled(value[f.name])).length;
+        const pct = Math.round((filledCount / sec.fields.length) * 100);
         return (
-        <Card key={sec.title} className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display font-semibold text-lg">{sec.title}</h3>
-            <span className="text-xs text-muted-foreground">
+        <Card key={sec.title} className="p-6 overflow-hidden relative">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/60 to-accent" />
+          <div className="flex items-center justify-between mb-4 pl-2">
+            <div>
+              <h3 className="font-display font-semibold text-lg">{sec.title}</h3>
+              <div className="mt-1 h-1.5 w-32 rounded-full bg-muted overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-primary to-success transition-all" style={{ width: `${pct}%` }} />
+              </div>
+            </div>
+            <span className="text-xs text-muted-foreground font-medium">
               {filledCount}/{sec.fields.length} preenchido(s)
             </span>
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {sec.fields.map((f) => {
               const v = value[f.name];
