@@ -289,14 +289,22 @@ export function BeneficiarioForm({
 
       {orderedSections.map((sec) => {
         const filledCount = sec.fields.filter((f) => isFilled(value[f.name])).length;
+        const pct = Math.round((filledCount / sec.fields.length) * 100);
         return (
-        <Card key={sec.title} className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display font-semibold text-lg">{sec.title}</h3>
-            <span className="text-xs text-muted-foreground">
+        <Card key={sec.title} className="p-6 overflow-hidden relative">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/60 to-accent" />
+          <div className="flex items-center justify-between mb-4 pl-2">
+            <div>
+              <h3 className="font-display font-semibold text-lg">{sec.title}</h3>
+              <div className="mt-1 h-1.5 w-32 rounded-full bg-muted overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-primary to-success transition-all" style={{ width: `${pct}%` }} />
+              </div>
+            </div>
+            <span className="text-xs text-muted-foreground font-medium">
               {filledCount}/{sec.fields.length} preenchido(s)
             </span>
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {sec.fields.map((f) => {
               const v = value[f.name];
