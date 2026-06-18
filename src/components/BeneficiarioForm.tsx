@@ -19,12 +19,22 @@ const sections: { title: string; fields: Field[] }[] = [
     fields: [
       { name: "nome", label: "Nome completo", full: true },
       { name: "codigo", label: "Código", type: "number" },
-      { name: "cpf", label: "CPF" },
-      { name: "rg", label: "RG" },
+      { name: "cpf", label: "CPF (opcional)" },
+      { name: "rg", label: "RG (opcional)" },
       { name: "data_nascimento", label: "Data de nascimento", type: "date" },
       { name: "genero", label: "Gênero" },
       { name: "classe_risco", label: "Classe de risco" },
       { name: "ativo", label: "Beneficiário ativo", type: "bool" },
+    ],
+  },
+  {
+    title: "Certidão de nascimento (quando não houver CPF/RG)",
+    fields: [
+      { name: "num_termo", label: "Nº do termo" },
+      { name: "num_livro", label: "Nº do livro" },
+      { name: "num_folha", label: "Nº da folha" },
+      { name: "circunscricao", label: "Circunscrição / Cartório" },
+      { name: "distrito", label: "Distrito" },
     ],
   },
   {
