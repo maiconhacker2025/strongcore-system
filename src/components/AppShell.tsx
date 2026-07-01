@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Users, LayoutDashboard, UserPlus, Sparkles, Download, UserCheck, UserMinus } from "lucide-react";
+import { Users, LayoutDashboard, UserPlus, Sparkles, Download, UserCheck, UserMinus, FileBarChart2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { QuickSearch } from "@/components/QuickSearch";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ const navItems = [
   { to: "/beneficiarios", label: "Ativos", icon: UserCheck, search: { status: "ativos" }, match: "ativos" },
   { to: "/beneficiarios", label: "Inativos", icon: UserMinus, search: { status: "inativos" }, match: "inativos" },
   { to: "/beneficiarios/novo", label: "Cadastrar", icon: UserPlus },
+  { to: "/relatorios", label: "Relatórios", icon: FileBarChart2 },
   { to: "/ia", label: "Assistente IA", icon: Sparkles },
 ] as const;
 
