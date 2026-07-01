@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as IaRouteImport } from './routes/ia'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BeneficiariosIndexRouteImport } from './routes/beneficiarios.index'
 import { Route as BeneficiariosNovoRouteImport } from './routes/beneficiarios.novo'
 import { Route as BeneficiariosIdRouteImport } from './routes/beneficiarios.$id'
 
+const RelatoriosRoute = RelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IaRoute = IaRouteImport.update({
   id: '/ia',
   path: '/ia',
@@ -44,6 +50,7 @@ const BeneficiariosIdRoute = BeneficiariosIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ia': typeof IaRoute
+  '/relatorios': typeof RelatoriosRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
   '/beneficiarios/': typeof BeneficiariosIndexRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ia': typeof IaRoute
+  '/relatorios': typeof RelatoriosRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
   '/beneficiarios': typeof BeneficiariosIndexRoute
@@ -59,6 +67,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/ia': typeof IaRoute
+  '/relatorios': typeof RelatoriosRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
   '/beneficiarios/': typeof BeneficiariosIndexRoute
@@ -68,6 +77,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/ia'
+    | '/relatorios'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
     | '/beneficiarios/'
@@ -75,6 +85,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/ia'
+    | '/relatorios'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
     | '/beneficiarios'
@@ -82,6 +93,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/ia'
+    | '/relatorios'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
     | '/beneficiarios/'
@@ -90,6 +102,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   IaRoute: typeof IaRoute
+  RelatoriosRoute: typeof RelatoriosRoute
   BeneficiariosIdRoute: typeof BeneficiariosIdRoute
   BeneficiariosNovoRoute: typeof BeneficiariosNovoRoute
   BeneficiariosIndexRoute: typeof BeneficiariosIndexRoute
@@ -97,6 +110,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/relatorios': {
+      id: '/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof RelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ia': {
       id: '/ia'
       path: '/ia'
@@ -138,6 +158,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   IaRoute: IaRoute,
+  RelatoriosRoute: RelatoriosRoute,
   BeneficiariosIdRoute: BeneficiariosIdRoute,
   BeneficiariosNovoRoute: BeneficiariosNovoRoute,
   BeneficiariosIndexRoute: BeneficiariosIndexRoute,
