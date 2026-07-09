@@ -279,7 +279,7 @@ function Dashboard() {
           )}
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
           <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
             <HeartPulse className="size-5 text-rose-600" /> Alertas de saúde
           </h2>
@@ -314,7 +314,7 @@ function Dashboard() {
 
       {/* Faixa etária + Gênero + Top escolas */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-        <Card className="p-5">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
           <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
             <UsersRound className="size-4 text-primary" /> Faixa etária
           </h2>
@@ -330,7 +330,7 @@ function Dashboard() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
           <h2 className="font-display font-semibold mb-3">Gênero</h2>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
@@ -345,7 +345,7 @@ function Dashboard() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
           <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
             <School className="size-4 text-emerald-600" /> Top escolas (ativos)
           </h2>
@@ -373,7 +373,7 @@ function Dashboard() {
       </div>
 
       {/* Ingressos por ano */}
-      <Card className="p-5 mt-4">
+      <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white mt-4">
         <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
           <CalendarCheck2 className="size-4 text-blue-600" /> Ingressos por ano (últimos)
         </h2>
@@ -396,7 +396,7 @@ function Dashboard() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-8">
-        <Card className="p-5 lg:col-span-2">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display font-semibold">Distribuição por escolaridade</h2>
             <TrendingUp className="size-4 text-muted-foreground" />
@@ -413,7 +413,7 @@ function Dashboard() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
           <h2 className="font-display font-semibold mb-4">Classe de risco</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -428,7 +428,7 @@ function Dashboard() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
           <h2 className="font-display font-semibold mb-4">Top bairros</h2>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
@@ -442,7 +442,7 @@ function Dashboard() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
           <h2 className="font-display font-semibold mb-4">Por turno</h2>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
@@ -457,7 +457,7 @@ function Dashboard() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
           <h2 className="font-display font-semibold mb-4">Desligamentos por ano</h2>
           <div className="h-56">
             {desligData.length === 0 ? (
@@ -477,7 +477,7 @@ function Dashboard() {
       </div>
 
       {/* Quick reports */}
-      <Card className="mt-8 p-5">
+      <Card className="mt-8 p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="font-display font-semibold text-lg">Relatórios rápidos</h2>
@@ -505,7 +505,7 @@ function Dashboard() {
       </Card>
 
       {/* Recent */}
-      <Card className="mt-8 overflow-hidden">
+      <Card className="mt-8 overflow-hidden rounded-2xl border border-slate-200/70 shadow-sm bg-white">
         <div className="flex items-center justify-between p-5 border-b">
           <h2 className="text-lg font-display font-semibold">Cadastros recentes</h2>
           <Link to="/beneficiarios" className="text-sm text-primary font-medium hover:underline inline-flex items-center gap-1">
