@@ -201,40 +201,54 @@ function Dashboard() {
     <div className="p-6 md:p-10 max-w-7xl mx-auto">
       <header className="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-display font-bold">Painel geral</h1>
-          <p className="text-muted-foreground mt-1">Visão consolidada dos beneficiários cadastrados.</p>
+          <h1 className="font-display text-3xl md:text-[34px] font-bold text-slate-900 leading-tight">Painel Geral</h1>
+          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 font-bold mt-1.5">
+            Administração Institucional · Visão Consolidada
+          </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => backupExcel().then((n) => n && toast.success(`Excel baixado · ${n} registros`))}>
+          <Button variant="outline" className="rounded-xl border-slate-200" onClick={() => backupExcel().then((n) => n && toast.success(`Excel baixado · ${n} registros`))}>
             <FileSpreadsheet className="size-4" /> Excel completo
           </Button>
-          <Button variant="outline" onClick={() => backupPdf().then((n) => n && toast.success(`PDF baixado · ${n} registros`))}>
+          <Button variant="outline" className="rounded-xl border-slate-200" onClick={() => backupPdf().then((n) => n && toast.success(`PDF baixado · ${n} registros`))}>
             <FileType2 className="size-4" /> PDF completo
           </Button>
-          <Button onClick={runFullBackup}>
+          <Button className="rounded-xl bg-amber-500 hover:bg-amber-400 text-[#063b38] font-bold shadow-sm" onClick={runFullBackup}>
             <Download className="size-4" /> Backup semanal
           </Button>
         </div>
       </header>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {stats.map((s) => {
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+        {stats.map((s, idx) => {
           const Icon = s.icon;
           return (
-            <Card key={s.label} className="p-4">
-              <div className={`size-9 rounded-xl flex items-center justify-center ${s.color}`}>
-                <Icon className="size-4" />
+            <Card key={s.label} className="p-6 rounded-2xl border border-slate-200/70 shadow-sm relative overflow-hidden group bg-white">
+              {idx === 0 && (
+                <div className="absolute -right-6 -top-6 size-24 rounded-full bg-primary/5 group-hover:scale-110 transition-transform duration-500" />
+              )}
+              <div className="relative z-10 flex items-start justify-between">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.18em]">{s.label}</p>
+                <div className={`size-8 rounded-lg flex items-center justify-center ${s.color}`}>
+                  <Icon className="size-3.5" />
+                </div>
               </div>
-              <div className="mt-3">
-                <div className="text-2xl font-display font-bold leading-tight">{isLoading ? "…" : s.value}</div>
-                <div className="text-xs text-muted-foreground mt-1">{s.label}</div>
-                {(s as any).hint && <div className="text-[11px] text-muted-foreground/70 mt-0.5">{(s as any).hint}</div>}
+              <div className="relative z-10 mt-3 font-display font-bold text-3xl text-slate-900 leading-none">
+                {isLoading ? "…" : s.value}
               </div>
+              {(s as any).hint && (
+                <div className="relative z-10 mt-3 text-[11px] font-medium text-slate-500">
+                  <span className="inline-block px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">
+                    {(s as any).hint}
+                  </span>
+                </div>
+              )}
             </Card>
           );
         })}
       </div>
+
 
       {/* Destaques: Aniversariantes + Alertas */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
