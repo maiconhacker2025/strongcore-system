@@ -252,7 +252,7 @@ function Dashboard() {
 
       {/* Destaques: Aniversariantes + Alertas */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
-        <Card className="p-5 lg:col-span-2">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white lg:col-span-2">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display font-semibold flex items-center gap-2">
               <Cake className="size-5 text-purple-600" /> Aniversariantes do mês
