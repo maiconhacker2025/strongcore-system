@@ -201,44 +201,58 @@ function Dashboard() {
     <div className="p-6 md:p-10 max-w-7xl mx-auto">
       <header className="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-display font-bold">Painel geral</h1>
-          <p className="text-muted-foreground mt-1">Visão consolidada dos beneficiários cadastrados.</p>
+          <h1 className="font-display text-3xl md:text-[34px] font-bold text-slate-900 leading-tight">Painel Geral</h1>
+          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 font-bold mt-1.5">
+            Administração Institucional · Visão Consolidada
+          </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => backupExcel().then((n) => n && toast.success(`Excel baixado · ${n} registros`))}>
+          <Button variant="outline" className="rounded-xl border-slate-200" onClick={() => backupExcel().then((n) => n && toast.success(`Excel baixado · ${n} registros`))}>
             <FileSpreadsheet className="size-4" /> Excel completo
           </Button>
-          <Button variant="outline" onClick={() => backupPdf().then((n) => n && toast.success(`PDF baixado · ${n} registros`))}>
+          <Button variant="outline" className="rounded-xl border-slate-200" onClick={() => backupPdf().then((n) => n && toast.success(`PDF baixado · ${n} registros`))}>
             <FileType2 className="size-4" /> PDF completo
           </Button>
-          <Button onClick={runFullBackup}>
+          <Button className="rounded-xl bg-amber-500 hover:bg-amber-400 text-[#063b38] font-bold shadow-sm" onClick={runFullBackup}>
             <Download className="size-4" /> Backup semanal
           </Button>
         </div>
       </header>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {stats.map((s) => {
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+        {stats.map((s, idx) => {
           const Icon = s.icon;
           return (
-            <Card key={s.label} className="p-4">
-              <div className={`size-9 rounded-xl flex items-center justify-center ${s.color}`}>
-                <Icon className="size-4" />
+            <Card key={s.label} className="p-6 rounded-2xl border border-slate-200/70 shadow-sm relative overflow-hidden group bg-white">
+              {idx === 0 && (
+                <div className="absolute -right-6 -top-6 size-24 rounded-full bg-primary/5 group-hover:scale-110 transition-transform duration-500" />
+              )}
+              <div className="relative z-10 flex items-start justify-between">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.18em]">{s.label}</p>
+                <div className={`size-8 rounded-lg flex items-center justify-center ${s.color}`}>
+                  <Icon className="size-3.5" />
+                </div>
               </div>
-              <div className="mt-3">
-                <div className="text-2xl font-display font-bold leading-tight">{isLoading ? "…" : s.value}</div>
-                <div className="text-xs text-muted-foreground mt-1">{s.label}</div>
-                {(s as any).hint && <div className="text-[11px] text-muted-foreground/70 mt-0.5">{(s as any).hint}</div>}
+              <div className="relative z-10 mt-3 font-display font-bold text-3xl text-slate-900 leading-none">
+                {isLoading ? "…" : s.value}
               </div>
+              {(s as any).hint && (
+                <div className="relative z-10 mt-3 text-[11px] font-medium text-slate-500">
+                  <span className="inline-block px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">
+                    {(s as any).hint}
+                  </span>
+                </div>
+              )}
             </Card>
           );
         })}
       </div>
 
+
       {/* Destaques: Aniversariantes + Alertas */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
-        <Card className="p-5 lg:col-span-2">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white lg:col-span-2">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display font-semibold flex items-center gap-2">
               <Cake className="size-5 text-purple-600" /> Aniversariantes do mês
@@ -265,42 +279,38 @@ function Dashboard() {
           )}
         </Card>
 
-        <Card className="p-5">
-          <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
-            <HeartPulse className="size-5 text-rose-600" /> Alertas de saúde
-          </h2>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between p-2 rounded-lg bg-amber-50">
-              <div className="flex items-center gap-2 text-sm">
-                <Pill className="size-4 text-amber-700" /> Usa medicação
-              </div>
-              <span className="font-bold text-amber-700">{comMedicacao}</span>
-            </div>
-            <div className="flex items-center justify-between p-2 rounded-lg bg-rose-50">
-              <div className="flex items-center gap-2 text-sm">
-                <AlertTriangle className="size-4 text-rose-700" /> Possui alergia
-              </div>
-              <span className="font-bold text-rose-700">{comAlergia}</span>
-            </div>
-            <div className="flex items-center justify-between p-2 rounded-lg bg-orange-50">
-              <div className="flex items-center gap-2 text-sm">
-                <PhoneOff className="size-4 text-orange-700" /> Sem contato
-              </div>
-              <span className="font-bold text-orange-700">{semContato}</span>
-            </div>
-            <div className="flex items-center justify-between p-2 rounded-lg bg-red-50">
-              <div className="flex items-center gap-2 text-sm">
-                <AlertTriangle className="size-4 text-red-700" /> Risco alto
-              </div>
-              <span className="font-bold text-red-700">{risco}</span>
-            </div>
+        <Card className="p-6 rounded-2xl border-0 shadow-xl shadow-teal-950/20 bg-sidebar text-white overflow-hidden">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-display font-bold text-lg text-white flex items-center gap-2">
+              <HeartPulse className="size-5 text-amber-400" /> Alertas de Saúde
+            </h2>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-teal-300/70">Monitor</span>
+          </div>
+          <div className="space-y-2.5">
+            {[
+              { icon: Pill, label: "Usa medicação", value: comMedicacao, tone: "amber" },
+              { icon: AlertTriangle, label: "Possui alergia", value: comAlergia, tone: "rose" },
+              { icon: PhoneOff, label: "Sem contato", value: semContato, tone: "orange" },
+              { icon: AlertTriangle, label: "Risco alto", value: risco, tone: "red" },
+            ].map((a) => {
+              const Icon = a.icon;
+              return (
+                <div key={a.label} className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                  <div className="flex items-center gap-2.5 text-[13px] text-teal-100">
+                    <Icon className="size-4 text-amber-400" /> {a.label}
+                  </div>
+                  <span className="font-display font-bold text-white text-lg">{a.value}</span>
+                </div>
+              );
+            })}
           </div>
         </Card>
+
       </div>
 
       {/* Faixa etária + Gênero + Top escolas */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-        <Card className="p-5">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
           <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
             <UsersRound className="size-4 text-primary" /> Faixa etária
           </h2>
@@ -316,7 +326,7 @@ function Dashboard() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
           <h2 className="font-display font-semibold mb-3">Gênero</h2>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
@@ -331,7 +341,7 @@ function Dashboard() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
           <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
             <School className="size-4 text-emerald-600" /> Top escolas (ativos)
           </h2>
@@ -359,7 +369,7 @@ function Dashboard() {
       </div>
 
       {/* Ingressos por ano */}
-      <Card className="p-5 mt-4">
+      <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white mt-4">
         <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
           <CalendarCheck2 className="size-4 text-blue-600" /> Ingressos por ano (últimos)
         </h2>
@@ -382,7 +392,7 @@ function Dashboard() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-8">
-        <Card className="p-5 lg:col-span-2">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display font-semibold">Distribuição por escolaridade</h2>
             <TrendingUp className="size-4 text-muted-foreground" />
@@ -399,7 +409,7 @@ function Dashboard() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
           <h2 className="font-display font-semibold mb-4">Classe de risco</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -414,7 +424,7 @@ function Dashboard() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
           <h2 className="font-display font-semibold mb-4">Top bairros</h2>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
@@ -428,7 +438,7 @@ function Dashboard() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
           <h2 className="font-display font-semibold mb-4">Por turno</h2>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
@@ -443,7 +453,7 @@ function Dashboard() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
           <h2 className="font-display font-semibold mb-4">Desligamentos por ano</h2>
           <div className="h-56">
             {desligData.length === 0 ? (
@@ -463,7 +473,7 @@ function Dashboard() {
       </div>
 
       {/* Quick reports */}
-      <Card className="mt-8 p-5">
+      <Card className="mt-8 p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="font-display font-semibold text-lg">Relatórios rápidos</h2>
@@ -491,7 +501,7 @@ function Dashboard() {
       </Card>
 
       {/* Recent */}
-      <Card className="mt-8 overflow-hidden">
+      <Card className="mt-8 overflow-hidden rounded-2xl border border-slate-200/70 shadow-sm bg-white">
         <div className="flex items-center justify-between p-5 border-b">
           <h2 className="text-lg font-display font-semibold">Cadastros recentes</h2>
           <Link to="/beneficiarios" className="text-sm text-primary font-medium hover:underline inline-flex items-center gap-1">
