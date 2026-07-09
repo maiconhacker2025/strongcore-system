@@ -41,14 +41,6 @@ const CATEGORY_LABEL: Record<string, string> = {
   familia: "Família & contatos", movimento: "Movimentação",
 };
 
-const CATEGORY_COLOR: Record<string, string> = {
-  geral: "from-blue-500/10 to-indigo-500/10 text-blue-700 border-blue-200",
-  escolar: "from-emerald-500/10 to-teal-500/10 text-emerald-700 border-emerald-200",
-  saude: "from-rose-500/10 to-pink-500/10 text-rose-700 border-rose-200",
-  familia: "from-amber-500/10 to-orange-500/10 text-amber-700 border-amber-200",
-  movimento: "from-violet-500/10 to-purple-500/10 text-violet-700 border-violet-200",
-};
-
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 8 }, (_, i) => String(CURRENT_YEAR - i));
 
@@ -94,31 +86,32 @@ function RelatoriosPage() {
   }, []);
 
   return (
-    <div className="min-h-full bg-gradient-to-br from-slate-50 via-white to-blue-50/40">
-      {/* Hero */}
-      <div className="relative overflow-hidden border-b bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 text-white">
-        <div className="absolute -top-24 -right-24 size-72 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -bottom-16 -left-10 size-56 rounded-full bg-white/10 blur-3xl" />
-        <div className="relative px-6 md:px-10 py-8">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div>
-              <div className="flex items-center gap-2 text-blue-100 text-sm mb-2">
-                <Sparkles className="size-4" /> Central de Relatórios
+    <div className="min-h-full bg-background">
+      {/* Editorial header */}
+      <header className="border-b border-border bg-card">
+        <div className="px-6 md:px-10 py-8">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-6 sm:flex sm:flex-wrap sm:justify-between">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+                <Sparkles className="size-3.5 text-primary" />
+                <span>Central de Relatórios</span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-display font-bold tracking-tight">
-                Relatórios profissionais em segundos
+              <h1 className="font-display text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+                Relatórios institucionais
               </h1>
-              <p className="mt-2 text-blue-100 max-w-2xl">
+              <p className="mt-2 text-sm md:text-base text-muted-foreground max-w-2xl">
                 Modelos prontos com filtros avançados. Exporte em PDF, Excel ou Word — com ou sem IA.
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="secondary" className="gap-2 bg-white text-blue-700 hover:bg-white/90">
+                  <Button variant="outline" className="gap-2">
                     <Filter className="size-4" /> Filtros
                     {activeFilterCount > 0 && (
-                      <Badge className="ml-1 bg-blue-600 text-white">{activeFilterCount}</Badge>
+                      <Badge className="ml-1 h-5 min-w-5 px-1.5 bg-accent text-accent-foreground">
+                        {activeFilterCount}
+                      </Badge>
                     )}
                   </Button>
                 </SheetTrigger>
@@ -127,7 +120,7 @@ function RelatoriosPage() {
               <Button
                 onClick={() => generate()}
                 disabled={gen.isPending}
-                className="gap-2 bg-white text-blue-700 hover:bg-white/90"
+                className="gap-2"
               >
                 {gen.isPending ? <Loader2 className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
                 Gerar relatório
@@ -135,63 +128,65 @@ function RelatoriosPage() {
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="px-6 md:px-10 py-8 grid gap-8 lg:grid-cols-[360px_1fr]">
+      <div className="px-6 md:px-10 py-8 grid gap-8 lg:grid-cols-[340px_1fr]">
         {/* Catalog */}
         <aside className="space-y-6">
-          <div>
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              Modelos rápidos
-            </h2>
-            <div className="space-y-5">
-              {grouped.map(([cat, items]) => (
-                <div key={cat}>
-                  <div className={cn("text-[11px] font-bold uppercase tracking-wider mb-2 px-1",
-                    "text-muted-foreground")}>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            Modelos disponíveis
+          </div>
+          <div className="space-y-6">
+            {grouped.map(([cat, items]) => (
+              <div key={cat}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-px flex-1 bg-border" />
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                     {CATEGORY_LABEL[cat] ?? cat}
-                  </div>
-                  <div className="grid gap-2">
-                    {items.map((t) => {
-                      const Icon = ICONS[t.icon] ?? FileText;
-                      const active = selectedId === t.id;
-                      return (
-                        <button
-                          key={t.id}
-                          onClick={() => generate(t.id)}
-                          className={cn(
-                            "group text-left rounded-xl border p-3 transition-all",
-                            "hover:shadow-md hover:-translate-y-0.5",
-                            active
-                              ? "border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-sm ring-1 ring-blue-200"
-                              : "bg-white border-slate-200 hover:border-slate-300"
-                          )}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className={cn(
-                              "rounded-lg p-2 border bg-gradient-to-br",
-                              CATEGORY_COLOR[t.category]
-                            )}>
-                              <Icon className="size-4" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center justify-between gap-2">
-                                <p className="font-medium text-sm truncate">{t.name}</p>
-                                <ChevronRight className={cn("size-4 shrink-0 transition-transform",
-                                  active ? "text-blue-600 translate-x-0.5" : "text-slate-300 group-hover:text-slate-500")} />
-                              </div>
-                              <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-                                {t.description}
-                              </p>
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
+                  </span>
+                  <div className="h-px flex-1 bg-border" />
                 </div>
-              ))}
-            </div>
+                <div className="grid gap-2">
+                  {items.map((t) => {
+                    const Icon = ICONS[t.icon] ?? FileText;
+                    const active = selectedId === t.id;
+                    return (
+                      <button
+                        key={t.id}
+                        onClick={() => generate(t.id)}
+                        className={cn(
+                          "group text-left rounded-xl border p-3 transition-all",
+                          active
+                            ? "border-primary bg-primary-soft/40 shadow-[var(--shadow-soft)]"
+                            : "bg-card border-border hover:border-primary/40 hover:shadow-[var(--shadow-soft)]"
+                        )}
+                      >
+                        <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3">
+                          <div className={cn(
+                            "shrink-0 rounded-lg p-2 border",
+                            active
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-secondary text-primary border-border"
+                          )}>
+                            <Icon className="size-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm text-foreground truncate">{t.name}</p>
+                            <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                              {t.description}
+                            </p>
+                          </div>
+                          <ChevronRight className={cn(
+                            "size-4 shrink-0 mt-1 transition-transform",
+                            active ? "text-primary translate-x-0.5" : "text-muted-foreground/40 group-hover:text-muted-foreground"
+                          )} />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </aside>
 
@@ -209,13 +204,16 @@ function RelatoriosPage() {
 function EmptyPreview({ onGenerate, template }: { onGenerate: () => void; template: ReportTemplate }) {
   const Icon = ICONS[template.icon] ?? FileText;
   return (
-    <Card className="p-10 md:p-16 border-dashed border-2 bg-white/70 backdrop-blur flex flex-col items-center justify-center text-center">
-      <div className="rounded-2xl p-4 bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 mb-4">
+    <Card className="p-10 md:p-16 border-dashed border-2 border-border bg-card flex flex-col items-center justify-center text-center">
+      <div className="rounded-2xl p-4 bg-primary-soft text-primary mb-5">
         <Icon className="size-8" />
       </div>
-      <h3 className="text-xl font-display font-semibold">{template.name}</h3>
-      <p className="text-muted-foreground max-w-md mt-2">{template.description}</p>
-      <Button onClick={onGenerate} className="mt-6 gap-2 bg-blue-600 hover:bg-blue-700">
+      <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-2">
+        Pré-visualização
+      </div>
+      <h3 className="font-display text-2xl font-semibold text-foreground">{template.name}</h3>
+      <p className="text-sm text-muted-foreground max-w-md mt-2">{template.description}</p>
+      <Button onClick={onGenerate} className="mt-6 gap-2">
         <ArrowRight className="size-4" /> Gerar relatório
       </Button>
       <p className="text-xs text-muted-foreground mt-4">
@@ -227,17 +225,17 @@ function EmptyPreview({ onGenerate, template }: { onGenerate: () => void; templa
 
 function PreviewSkeleton({ title }: { title: string }) {
   return (
-    <Card className="p-8 bg-white animate-pulse">
+    <Card className="p-8 bg-card animate-pulse">
       <div className="flex items-center gap-3 mb-6">
-        <Loader2 className="size-5 animate-spin text-blue-600" />
-        <span className="text-sm text-muted-foreground">Gerando <b>{title}</b>…</span>
+        <Loader2 className="size-5 animate-spin text-primary" />
+        <span className="text-sm text-muted-foreground">Gerando <b className="text-foreground">{title}</b>…</span>
       </div>
-      <div className="grid grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="h-20 rounded-xl bg-slate-100" />
+          <div key={i} className="h-24 rounded-xl bg-muted" />
         ))}
       </div>
-      <div className="h-72 rounded-xl bg-slate-100" />
+      <div className="h-72 rounded-xl bg-muted" />
     </Card>
   );
 }
@@ -246,39 +244,41 @@ function ReportPreview({ report, onRegenerate }: { report: FullReport; onRegener
   return (
     <div className="space-y-5">
       {/* Header */}
-      <Card className="p-6 bg-gradient-to-br from-white to-blue-50/50 border-blue-100">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <div className="text-xs uppercase tracking-widest text-blue-600 font-semibold mb-1">
+      <Card className="p-6 md:p-8 bg-card border-border">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:justify-between">
+          <div className="min-w-0">
+            <div className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold mb-2">
               Relatório pronto
             </div>
-            <h2 className="text-2xl font-display font-bold">{report.title}</h2>
+            <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+              {report.title}
+            </h2>
             {report.subtitle && (
-              <p className="text-sm text-muted-foreground mt-1">{report.subtitle}</p>
+              <p className="text-sm text-muted-foreground mt-1.5">{report.subtitle}</p>
             )}
             {report.filters?.length ? (
-              <div className="flex flex-wrap gap-1.5 mt-3">
+              <div className="flex flex-wrap gap-1.5 mt-4">
                 {report.filters.map((f) => (
-                  <Badge key={f} variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-100">
+                  <Badge key={f} variant="outline" className="border-border bg-secondary text-secondary-foreground font-normal">
                     {f}
                   </Badge>
                 ))}
               </div>
             ) : null}
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={onRegenerate}>Atualizar</Button>
-          </div>
+          <Button variant="outline" onClick={onRegenerate} className="shrink-0">Atualizar</Button>
         </div>
 
         {report.kpis?.length ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6 pt-6 border-t border-border">
             {report.kpis.map((k) => (
-              <div key={k.label} className="rounded-xl border bg-white p-4">
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">
+              <div key={k.label} className="rounded-xl border border-border bg-background p-4">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">
                   {k.label}
                 </p>
-                <p className="text-2xl font-display font-bold text-blue-700 mt-1">{k.value}</p>
+                <p className="font-display text-3xl font-bold text-primary mt-2 tabular-nums">
+                  {k.value}
+                </p>
               </div>
             ))}
           </div>
@@ -286,52 +286,69 @@ function ReportPreview({ report, onRegenerate }: { report: FullReport; onRegener
       </Card>
 
       {/* Export toolbar */}
-      <Card className="p-4 flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-emerald-50 via-white to-blue-50">
-        <div className="flex items-center gap-2 text-sm">
-          <div className="rounded-lg bg-emerald-100 text-emerald-700 p-2">
-            <FileText className="size-4" />
+      <Card className="p-4 md:p-5 bg-card border-border">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:flex-wrap sm:justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="rounded-lg bg-primary-soft text-primary p-2 shrink-0">
+              <FileText className="size-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground">Exportar relatório</p>
+              <p className="text-xs text-muted-foreground">Escolha o formato ideal para compartilhar</p>
+            </div>
           </div>
-          <span className="font-medium">Exportar este relatório</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={() => exportReportPdf(report)} className="gap-2 bg-rose-600 hover:bg-rose-700">
-            <FileType2 className="size-4" /> PDF
-          </Button>
-          <Button onClick={() => exportReportXlsx(report)} className="gap-2 bg-emerald-600 hover:bg-emerald-700">
-            <FileSpreadsheet className="size-4" /> Excel
-          </Button>
-          <Button onClick={() => exportReportDocx(report)} className="gap-2 bg-blue-600 hover:bg-blue-700">
-            <FileText className="size-4" /> Word
-          </Button>
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <Button variant="outline" onClick={() => exportReportPdf(report)} className="gap-2">
+              <FileType2 className="size-4" /> PDF
+            </Button>
+            <Button variant="outline" onClick={() => exportReportXlsx(report)} className="gap-2">
+              <FileSpreadsheet className="size-4" /> Excel
+            </Button>
+            <Button variant="outline" onClick={() => exportReportDocx(report)} className="gap-2">
+              <FileText className="size-4" /> Word
+            </Button>
+          </div>
         </div>
       </Card>
 
       {/* GroupBy */}
       {report.groupBy?.length ? (
-        <Card className="p-6">
-          <h3 className="font-display font-semibold mb-4">Distribuição</h3>
+        <Card className="p-6 md:p-8 bg-card">
+          <div className="flex items-baseline justify-between gap-4 mb-5">
+            <h3 className="font-display text-xl font-semibold text-foreground">Distribuição</h3>
+            <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+              {report.groupBy.length} categorias
+            </span>
+          </div>
           <GroupBar data={report.groupBy} />
         </Card>
       ) : null}
 
       {/* Table */}
       {report.rows.length ? (
-        <Card className="p-0 overflow-hidden">
-          <div className="px-6 py-4 border-b bg-slate-50 flex items-center justify-between">
-            <h3 className="font-display font-semibold">Detalhamento ({report.rows.length})</h3>
-            <span className="text-xs text-muted-foreground">Ordenado por nome</span>
+        <Card className="p-0 overflow-hidden bg-card">
+          <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-background">
+            <h3 className="font-display text-lg font-semibold text-foreground">
+              Detalhamento
+              <span className="ml-2 text-sm font-sans font-normal text-muted-foreground tabular-nums">
+                ({report.rows.length})
+              </span>
+            </h3>
+            <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+              Ordenado por nome
+            </span>
           </div>
           <div className="overflow-x-auto">
             <PreviewTable columns={report.columns} rows={report.rows.slice(0, 100)} />
           </div>
           {report.rows.length > 100 && (
-            <div className="px-6 py-3 border-t bg-slate-50 text-xs text-muted-foreground text-center">
+            <div className="px-6 py-3 border-t border-border bg-background text-xs text-muted-foreground text-center">
               Exibindo os primeiros 100 registros — o arquivo exportado inclui todos os {report.rows.length}.
             </div>
           )}
         </Card>
       ) : (
-        <Card className="p-8 text-center text-muted-foreground">
+        <Card className="p-10 text-center text-muted-foreground">
           Nenhum beneficiário encontrado com esses filtros.
         </Card>
       )}
@@ -375,10 +392,10 @@ function PreviewTable({ columns, rows }: { columns: string[]; rows: any[] }) {
   return (
     <table className="w-full text-sm">
       <thead>
-        <tr className="bg-slate-100 text-slate-700">
-          <th className="text-left px-3 py-2 font-semibold w-10">#</th>
+        <tr className="bg-secondary/60 text-muted-foreground border-b border-border">
+          <th className="text-left px-4 py-3 font-semibold text-[10px] uppercase tracking-[0.16em] w-10">#</th>
           {columns.map((c) => (
-            <th key={c} className="text-left px-3 py-2 font-semibold whitespace-nowrap">
+            <th key={c} className="text-left px-4 py-3 font-semibold text-[10px] uppercase tracking-[0.16em] whitespace-nowrap">
               {labelOf(c)}
             </th>
           ))}
@@ -386,19 +403,22 @@ function PreviewTable({ columns, rows }: { columns: string[]; rows: any[] }) {
       </thead>
       <tbody>
         {rows.map((r, i) => (
-          <tr key={i} className="border-t hover:bg-blue-50/30">
-            <td className="px-3 py-2 text-muted-foreground">{i + 1}</td>
+          <tr key={i} className="border-b border-border last:border-0 hover:bg-primary-soft/20">
+            <td className="px-4 py-2.5 text-muted-foreground tabular-nums">{i + 1}</td>
             {columns.map((c) => (
-              <td key={c} className="px-3 py-2 whitespace-nowrap">
+              <td key={c} className="px-4 py-2.5 whitespace-nowrap text-foreground">
                 {c === "ativo" ? (
-                  <Badge variant={r.ativo ? "default" : "secondary"} className={r.ativo ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" : ""}>
+                  <Badge variant="outline" className={r.ativo
+                    ? "border-success/40 bg-success/10 text-success"
+                    : "border-border bg-muted text-muted-foreground"
+                  }>
                     {r.ativo ? "Ativo" : "Inativo"}
                   </Badge>
                 ) : c === "classe_risco" && r.classe_risco ? (
                   <Badge variant="outline" className={
-                    r.classe_risco === "Alto" ? "border-rose-300 text-rose-700 bg-rose-50" :
-                    r.classe_risco === "Médio" ? "border-amber-300 text-amber-700 bg-amber-50" :
-                    "border-emerald-300 text-emerald-700 bg-emerald-50"
+                    r.classe_risco === "Alto" ? "border-destructive/40 bg-destructive/10 text-destructive" :
+                    r.classe_risco === "Médio" ? "border-warning/40 bg-warning/15 text-warning-foreground" :
+                    "border-success/40 bg-success/10 text-success"
                   }>{r.classe_risco}</Badge>
                 ) : (
                   fmt(c, r[c], r)
@@ -416,18 +436,21 @@ function GroupBar({ data }: { data: { label: string; count: number }[] }) {
   const max = Math.max(...data.map((d) => d.count), 1);
   const total = data.reduce((s, d) => s + d.count, 0) || 1;
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {data.slice(0, 12).map((d) => (
-        <div key={d.label} className="grid grid-cols-[minmax(140px,220px)_1fr_auto] items-center gap-3">
-          <span className="text-sm truncate" title={d.label}>{d.label}</span>
-          <div className="h-3 rounded-full bg-slate-100 overflow-hidden">
+        <div key={d.label} className="grid grid-cols-[minmax(120px,200px)_1fr_auto] items-center gap-4">
+          <span className="text-sm text-foreground truncate" title={d.label}>{d.label}</span>
+          <div className="h-2 rounded-full bg-secondary overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all"
+              className="h-full bg-primary rounded-full transition-all"
               style={{ width: `${(d.count / max) * 100}%` }}
             />
           </div>
-          <span className="text-sm tabular-nums font-medium w-24 text-right">
-            {d.count} <span className="text-muted-foreground">({((d.count / total) * 100).toFixed(1)}%)</span>
+          <span className="text-sm tabular-nums font-medium text-foreground w-24 text-right">
+            {d.count}{" "}
+            <span className="text-muted-foreground font-normal">
+              ({((d.count / total) * 100).toFixed(1)}%)
+            </span>
           </span>
         </div>
       ))}
@@ -445,8 +468,8 @@ function FiltersSheet({
   return (
     <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
       <SheetHeader>
-        <SheetTitle className="flex items-center gap-2">
-          <Filter className="size-4" /> Filtros do relatório
+        <SheetTitle className="font-display flex items-center gap-2 text-xl">
+          <Filter className="size-4 text-primary" /> Filtros do relatório
         </SheetTitle>
       </SheetHeader>
 
@@ -564,16 +587,16 @@ function FiltersSheet({
           </Select>
         </div>
 
-        <div className="flex items-center justify-between rounded-lg border p-3">
+        <div className="flex items-center justify-between rounded-lg border border-border p-3">
           <div>
-            <p className="text-sm font-medium">Em uso de medicação</p>
+            <p className="text-sm font-medium text-foreground">Em uso de medicação</p>
             <p className="text-xs text-muted-foreground">Apenas quem tem medicação registrada</p>
           </div>
           <Switch checked={!!filters.medicacao} onCheckedChange={(v) => update({ medicacao: v || undefined })} />
         </div>
-        <div className="flex items-center justify-between rounded-lg border p-3">
+        <div className="flex items-center justify-between rounded-lg border border-border p-3">
           <div>
-            <p className="text-sm font-medium">Com alergia</p>
+            <p className="text-sm font-medium text-foreground">Com alergia</p>
             <p className="text-xs text-muted-foreground">Apenas quem tem alergia registrada</p>
           </div>
           <Switch checked={!!filters.alergia} onCheckedChange={(v) => update({ alergia: v || undefined })} />
@@ -581,10 +604,10 @@ function FiltersSheet({
 
         <div className="flex items-center gap-2 pt-2">
           <Button variant="outline" onClick={reset} className="gap-2">
-            <X className="size-4" /> Limpar filtros
+            <X className="size-4" /> Limpar
           </Button>
-          <Button onClick={onClose} className="flex-1 bg-blue-600 hover:bg-blue-700">
-            Aplicar
+          <Button onClick={onClose} className="flex-1">
+            Aplicar filtros
           </Button>
         </div>
       </div>
