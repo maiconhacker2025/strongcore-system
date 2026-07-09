@@ -1,5 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Users, LayoutDashboard, UserPlus, Sparkles, Download, UserCheck, UserMinus, FileBarChart2 } from "lucide-react";
+import {
+  Users, LayoutDashboard, UserPlus, Sparkles, Download,
+  UserCheck, UserMinus, FileBarChart2, Award,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { QuickSearch } from "@/components/QuickSearch";
 import { Button } from "@/components/ui/button";
@@ -8,14 +11,24 @@ import { AuthGate, LogoutButton } from "@/components/AuthGate";
 import logo from "@/assets/logo-progredir.jpg";
 import { useEffect, useState } from "react";
 
-const navItems = [
-  { to: "/", label: "Painel", icon: LayoutDashboard, exact: true },
-  { to: "/beneficiarios", label: "Todos beneficiários", icon: Users, exact: true, search: {} },
-  { to: "/beneficiarios", label: "Ativos", icon: UserCheck, search: { status: "ativos" }, match: "ativos" },
-  { to: "/beneficiarios", label: "Inativos", icon: UserMinus, search: { status: "inativos" }, match: "inativos" },
-  { to: "/beneficiarios/novo", label: "Cadastrar", icon: UserPlus },
-  { to: "/relatorios", label: "Relatórios", icon: FileBarChart2 },
-  { to: "/ia", label: "Assistente IA", icon: Sparkles },
+const navGroups = [
+  {
+    label: "Gestão Principal",
+    items: [
+      { to: "/", label: "Painel Geral", icon: LayoutDashboard, exact: true },
+      { to: "/beneficiarios", label: "Todos beneficiários", icon: Users, exact: true, search: {} },
+      { to: "/beneficiarios", label: "Ativos", icon: UserCheck, search: { status: "ativos" }, match: "ativos" },
+      { to: "/beneficiarios", label: "Inativos", icon: UserMinus, search: { status: "inativos" }, match: "inativos" },
+    ],
+  },
+  {
+    label: "Operacional",
+    items: [
+      { to: "/beneficiarios/novo", label: "Cadastrar", icon: UserPlus },
+      { to: "/relatorios", label: "Relatórios", icon: FileBarChart2 },
+      { to: "/ia", label: "Assistente IA", icon: Sparkles },
+    ],
+  },
 ] as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -32,83 +45,97 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     setBusy(false);
   };
 
+  const currentStatus = typeof window !== "undefined"
+    ? new URLSearchParams(window.location.search).get("status")
+    : null;
+
   return (
     <AuthGate>
-    <div className="min-h-screen flex bg-background">
-      <aside className="hidden md:flex w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
-        <div className="relative px-5 pt-6 pb-5 border-b border-sidebar-border overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-primary/5" />
-          <div className="absolute -top-12 -right-12 size-32 rounded-full bg-primary/10 blur-2xl" />
-          <div className="absolute -bottom-10 -left-10 size-24 rounded-full bg-primary/10 blur-2xl" />
-          <div className="relative flex flex-col items-center gap-2">
-            <div className="rounded-xl bg-white shadow-sm ring-1 ring-black/5 p-2">
-              <img src={logo} alt="Espaço Progredir — Acreditando na vida" className="h-14 object-contain" />
+    <div className="min-h-screen flex bg-[#f6f7f5]">
+      <aside className="hidden md:flex w-72 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border shrink-0">
+        {/* Brand */}
+        <div className="px-6 pt-7 pb-6">
+          <div className="flex items-center gap-3">
+            <div className="size-11 rounded-xl bg-amber-500 shadow-lg shadow-amber-900/30 ring-1 ring-amber-400/40 p-1.5 flex items-center justify-center overflow-hidden">
+              <img src={logo} alt="Espaço Progredir" className="size-full object-contain" />
             </div>
-            <div className="text-center mt-1">
-              <p className="font-display text-[15px] font-semibold tracking-tight text-foreground leading-none">
-                Espaço Progredir
-              </p>
-              <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                Acreditando na vida
-              </p>
+            <div className="leading-tight">
+              <p className="font-display font-bold text-white text-[17px] tracking-tight">Espaço Progredir</p>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-teal-300/80 font-semibold mt-0.5">Acreditando na vida</p>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 px-3 py-6 space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const search = (item as any).search;
-            const matchKey = (item as any).match as string | undefined;
-            const isExact = (item as any).exact;
-            const currentStatus = typeof window !== "undefined"
-              ? new URLSearchParams(window.location.search).get("status")
-              : null;
-            let active = false;
-            if (item.to === "/") active = path === "/";
-            else if (matchKey) active = path === item.to && currentStatus === matchKey;
-            else if (isExact) active = path === item.to && !currentStatus;
-            else active = path.startsWith(item.to);
-            return (
-              <Link
-                key={item.label}
-                to={item.to}
-                search={search as any}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                  active
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "opacity-80 hover:opacity-100 hover:bg-sidebar-accent/50"
-                )}
-              >
-                <Icon className="size-4" />
-                {item.label}
-              </Link>
-            );
-          })}
+        {/* Nav */}
+        <nav className="flex-1 px-4 space-y-6 overflow-y-auto">
+          {navGroups.map((group) => (
+            <div key={group.label}>
+              <div className="text-[10px] uppercase tracking-[0.22em] text-teal-400/70 font-bold mb-3 px-4">
+                {group.label}
+              </div>
+              <div className="space-y-1">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const search = (item as any).search;
+                  const matchKey = (item as any).match as string | undefined;
+                  const isExact = (item as any).exact;
+                  let active = false;
+                  if (item.to === "/") active = path === "/";
+                  else if (matchKey) active = path === item.to && currentStatus === matchKey;
+                  else if (isExact) active = path === item.to && !currentStatus;
+                  else active = path.startsWith(item.to);
+                  return (
+                    <Link
+                      key={item.label}
+                      to={item.to}
+                      search={search as any}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] transition-all",
+                        active
+                          ? "bg-white/10 text-white border border-white/10 shadow-sm font-medium"
+                          : "text-teal-100/70 hover:bg-white/5 hover:text-white"
+                      )}
+                    >
+                      <Icon className="size-4 opacity-90" />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
-        <div className="p-3 border-t border-sidebar-border space-y-2">
-          <Button
-            onClick={doBackup}
-            disabled={busy}
-            variant="outline"
-            className="w-full bg-white/10 hover:bg-white/20 border-white/20 text-sidebar-foreground"
-          >
-            <Download className="size-4" /> Backup semanal
-          </Button>
-          <p className="text-[11px] opacity-70 text-center">
-            {days === null ? "Nenhum backup ainda" : days === 0 ? "Backup feito hoje ✓" : `Último backup há ${days} dia(s)`}
-          </p>
-          <div className="pt-1 flex justify-center">
+        {/* Backup card */}
+        <div className="p-4">
+          <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Award className="size-3.5 text-amber-400" />
+              <p className="text-[10px] uppercase tracking-widest text-amber-400 font-bold">Backup Semanal</p>
+            </div>
+            <p className="text-[11px] text-teal-100/80 mb-3 leading-snug">
+              {days === null ? "Faça o primeiro backup completo do sistema." : days === 0 ? "Backup feito hoje ✓" : `Último backup há ${days} dia(s).`}
+            </p>
+            <Button
+              onClick={doBackup}
+              disabled={busy}
+              size="sm"
+              className="w-full bg-amber-500 hover:bg-amber-400 text-[#063b38] font-bold text-[11px] uppercase tracking-widest shadow-sm h-8"
+            >
+              <Download className="size-3.5" /> Gerar Backup
+            </Button>
+          </div>
+          <div className="pt-3 flex justify-center">
             <LogoutButton />
           </div>
         </div>
       </aside>
 
       <main className="flex-1 min-w-0 flex flex-col">
-        <div className="border-b bg-background/80 backdrop-blur sticky top-0 z-30 px-4 md:px-10 py-3 flex items-center gap-4">
-          <QuickSearch />
+        <div className="h-20 border-b border-slate-200 bg-white flex items-center justify-between px-6 md:px-10 sticky top-0 z-30">
+          <div className="min-w-0 flex-1 max-w-lg">
+            <QuickSearch />
+          </div>
         </div>
         <div className="flex-1 min-w-0">{children}</div>
       </main>
