@@ -279,37 +279,33 @@ function Dashboard() {
           )}
         </Card>
 
-        <Card className="p-6 rounded-2xl border border-slate-200/70 shadow-sm bg-white">
-          <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
-            <HeartPulse className="size-5 text-rose-600" /> Alertas de saúde
-          </h2>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between p-2 rounded-lg bg-amber-50">
-              <div className="flex items-center gap-2 text-sm">
-                <Pill className="size-4 text-amber-700" /> Usa medicação
-              </div>
-              <span className="font-bold text-amber-700">{comMedicacao}</span>
-            </div>
-            <div className="flex items-center justify-between p-2 rounded-lg bg-rose-50">
-              <div className="flex items-center gap-2 text-sm">
-                <AlertTriangle className="size-4 text-rose-700" /> Possui alergia
-              </div>
-              <span className="font-bold text-rose-700">{comAlergia}</span>
-            </div>
-            <div className="flex items-center justify-between p-2 rounded-lg bg-orange-50">
-              <div className="flex items-center gap-2 text-sm">
-                <PhoneOff className="size-4 text-orange-700" /> Sem contato
-              </div>
-              <span className="font-bold text-orange-700">{semContato}</span>
-            </div>
-            <div className="flex items-center justify-between p-2 rounded-lg bg-red-50">
-              <div className="flex items-center gap-2 text-sm">
-                <AlertTriangle className="size-4 text-red-700" /> Risco alto
-              </div>
-              <span className="font-bold text-red-700">{risco}</span>
-            </div>
+        <Card className="p-6 rounded-2xl border-0 shadow-xl shadow-teal-950/20 bg-sidebar text-white overflow-hidden">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-display font-bold text-lg text-white flex items-center gap-2">
+              <HeartPulse className="size-5 text-amber-400" /> Alertas de Saúde
+            </h2>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-teal-300/70">Monitor</span>
+          </div>
+          <div className="space-y-2.5">
+            {[
+              { icon: Pill, label: "Usa medicação", value: comMedicacao, tone: "amber" },
+              { icon: AlertTriangle, label: "Possui alergia", value: comAlergia, tone: "rose" },
+              { icon: PhoneOff, label: "Sem contato", value: semContato, tone: "orange" },
+              { icon: AlertTriangle, label: "Risco alto", value: risco, tone: "red" },
+            ].map((a) => {
+              const Icon = a.icon;
+              return (
+                <div key={a.label} className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                  <div className="flex items-center gap-2.5 text-[13px] text-teal-100">
+                    <Icon className="size-4 text-amber-400" /> {a.label}
+                  </div>
+                  <span className="font-display font-bold text-white text-lg">{a.value}</span>
+                </div>
+              );
+            })}
           </div>
         </Card>
+
       </div>
 
       {/* Faixa etária + Gênero + Top escolas */}
