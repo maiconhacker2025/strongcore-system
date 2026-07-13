@@ -20,8 +20,15 @@ import {
   LayoutDashboard, UserCheck, UserMinus, GraduationCap, School, Clock,
   MapPin, ShieldAlert, Users as UsersIcon, Cake, PartyPopper, LogIn, LogOut,
   Pill, AlertTriangle, Phone, ArrowRight, X, ChevronRight,
-  Bot, Settings2, History, Trash2, ShieldCheck,
+  Bot, Settings2, History, Trash2, ShieldCheck, Bookmark, BookmarkPlus, Save,
 } from "lucide-react";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { REPORT_TEMPLATES, type ReportTemplate, type ReportFilters, getTemplate } from "@/lib/reports";
 import type { FullReport } from "@/lib/reports-export";
 import { exportReportPdf, exportReportXlsx, exportReportDocx } from "@/lib/reports-export";
@@ -29,8 +36,13 @@ import {
   getReportSettings, updateReportSettings, logReport,
   listReportLogs, deleteReportLog, clearReportLogs, countAiToday,
 } from "@/lib/reports-admin";
+import {
+  listReportViews, createReportView, updateReportView, deleteReportView,
+  type ReportView,
+} from "@/lib/report-views";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/relatorios")({
   component: () => <AppShell><RelatoriosPage /></AppShell>,
