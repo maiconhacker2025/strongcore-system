@@ -293,7 +293,17 @@ export const askDataAi = createServerFn({ method: "POST" })
         continue;
       }
 
-      return { reply: String(msg.content ?? ""), tables };
+      const finalReply = String(msg.content ?? "");
+      const lastUser = [...data.messages].reverse().find((m) => m.role === "user")?.content ?? "";
+      const rowCount = tables.reduce((acc, t) => acc + (t.rows?.length ?? 0), 0);
+      await supabaseAdmin.from("report_logs").insert({
+        kind: "ai",
+        title: lastUser.slice(0, 120) || "Consulta IA",
+        question: lastUser,
+        row_count: rowCount,
+      });
+      return { reply: finalReply, tables };
+
     }
 
     return { reply: "Não consegui concluir a consulta. Tente reformular a pergunta.", tables };
