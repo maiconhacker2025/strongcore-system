@@ -123,102 +123,348 @@ function RelatoriosPage() {
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" className="gap-2">
-                    <Filter className="size-4" /> Filtros
-                    {activeFilterCount > 0 && (
-                      <Badge className="ml-1 h-5 min-w-5 px-1.5 bg-accent text-accent-foreground">
-                        {activeFilterCount}
-                      </Badge>
-                    )}
+              {tab === "modelos" && (
+                <>
+                  <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" className="gap-2">
+                        <Filter className="size-4" /> Filtros
+                        {activeFilterCount > 0 && (
+                          <Badge className="ml-1 h-5 min-w-5 px-1.5 bg-accent text-accent-foreground">
+                            {activeFilterCount}
+                          </Badge>
+                        )}
+                      </Button>
+                    </SheetTrigger>
+                    <FiltersSheet filters={filters} setFilters={setFilters} onClose={() => setFiltersOpen(false)} />
+                  </Sheet>
+                  <Button
+                    onClick={() => generate()}
+                    disabled={gen.isPending}
+                    className="gap-2"
+                  >
+                    {gen.isPending ? <Loader2 className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
+                    Gerar relatório
                   </Button>
-                </SheetTrigger>
-                <FiltersSheet filters={filters} setFilters={setFilters} onClose={() => setFiltersOpen(false)} />
-              </Sheet>
-              <Button
-                onClick={() => generate()}
-                disabled={gen.isPending}
-                className="gap-2"
-              >
-                {gen.isPending ? <Loader2 className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
-                Gerar relatório
-              </Button>
+                </>
+              )}
             </div>
           </div>
+
+          <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="mt-6">
+            <TabsList>
+              <TabsTrigger value="modelos" className="gap-2"><LayoutDashboard className="size-4" /> Modelos</TabsTrigger>
+              <TabsTrigger value="config" className="gap-2"><Settings2 className="size-4" /> Configurações</TabsTrigger>
+              <TabsTrigger value="logs" className="gap-2"><History className="size-4" /> Histórico</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </header>
 
-      <div className="px-6 md:px-10 py-8 grid gap-8 lg:grid-cols-[340px_1fr]">
-        {/* Catalog */}
-        <aside className="space-y-6">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            Modelos disponíveis
-          </div>
-          <div className="space-y-6">
-            {grouped.map(([cat, items]) => (
-              <div key={cat}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="h-px flex-1 bg-border" />
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                    {CATEGORY_LABEL[cat] ?? cat}
-                  </span>
-                  <div className="h-px flex-1 bg-border" />
-                </div>
-                <div className="grid gap-2">
-                  {items.map((t) => {
-                    const Icon = ICONS[t.icon] ?? FileText;
-                    const active = selectedId === t.id;
-                    return (
-                      <button
-                        key={t.id}
-                        onClick={() => generate(t.id)}
-                        className={cn(
-                          "group text-left rounded-xl border p-3 transition-all",
-                          active
-                            ? "border-primary bg-primary-soft/40 shadow-[var(--shadow-soft)]"
-                            : "bg-card border-border hover:border-primary/40 hover:shadow-[var(--shadow-soft)]"
-                        )}
-                      >
-                        <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3">
-                          <div className={cn(
-                            "shrink-0 rounded-lg p-2 border",
+      {tab === "modelos" && (
+        <div className="px-6 md:px-10 py-8 grid gap-8 lg:grid-cols-[340px_1fr]">
+          <aside className="space-y-6">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Modelos disponíveis
+            </div>
+            <div className="space-y-6">
+              {grouped.map(([cat, items]) => (
+                <div key={cat}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-px flex-1 bg-border" />
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                      {CATEGORY_LABEL[cat] ?? cat}
+                    </span>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+                  <div className="grid gap-2">
+                    {items.map((t) => {
+                      const Icon = ICONS[t.icon] ?? FileText;
+                      const active = selectedId === t.id;
+                      return (
+                        <button
+                          key={t.id}
+                          onClick={() => generate(t.id)}
+                          className={cn(
+                            "group text-left rounded-xl border p-3 transition-all",
                             active
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-secondary text-primary border-border"
-                          )}>
-                            <Icon className="size-4" />
+                              ? "border-primary bg-primary-soft/40 shadow-[var(--shadow-soft)]"
+                              : "bg-card border-border hover:border-primary/40 hover:shadow-[var(--shadow-soft)]"
+                          )}
+                        >
+                          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3">
+                            <div className={cn(
+                              "shrink-0 rounded-lg p-2 border",
+                              active
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-secondary text-primary border-border"
+                            )}>
+                              <Icon className="size-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm text-foreground truncate">{t.name}</p>
+                              <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                                {t.description}
+                              </p>
+                            </div>
+                            <ChevronRight className={cn(
+                              "size-4 shrink-0 mt-1 transition-transform",
+                              active ? "text-primary translate-x-0.5" : "text-muted-foreground/40 group-hover:text-muted-foreground"
+                            )} />
                           </div>
-                          <div className="min-w-0">
-                            <p className="font-medium text-sm text-foreground truncate">{t.name}</p>
-                            <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-                              {t.description}
-                            </p>
-                          </div>
-                          <ChevronRight className={cn(
-                            "size-4 shrink-0 mt-1 transition-transform",
-                            active ? "text-primary translate-x-0.5" : "text-muted-foreground/40 group-hover:text-muted-foreground"
-                          )} />
-                        </div>
-                      </button>
-                    );
-                  })}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </aside>
+              ))}
+            </div>
+          </aside>
 
-        {/* Preview */}
-        <section className="min-w-0">
-          {gen.isPending && <PreviewSkeleton title={selected.name} />}
-          {!gen.isPending && !report && <EmptyPreview onGenerate={() => generate()} template={selected} />}
-          {report && <ReportPreview report={report} onRegenerate={() => generate()} />}
-        </section>
-      </div>
+          <section className="min-w-0">
+            {gen.isPending && <PreviewSkeleton title={selected.name} />}
+            {!gen.isPending && !report && <EmptyPreview onGenerate={() => generate()} template={selected} />}
+            {report && <ReportPreview report={report} onRegenerate={() => generate()} />}
+          </section>
+        </div>
+      )}
+
+      {tab === "config" && (
+        <div className="px-6 md:px-10 py-8"><SettingsPanel /></div>
+      )}
+
+      {tab === "logs" && (
+        <div className="px-6 md:px-10 py-8"><LogsPanel /></div>
+      )}
     </div>
   );
 }
+
+/* ============ Settings panel ============ */
+function SettingsPanel() {
+  const qc = useQueryClient();
+  const settings = useQuery({ queryKey: ["report-settings"], queryFn: getReportSettings });
+  const used = useQuery({ queryKey: ["ai-used-today"], queryFn: countAiToday });
+
+  const save = useMutation({
+    mutationFn: updateReportSettings,
+    onSuccess: () => {
+      toast.success("Configurações salvas");
+      qc.invalidateQueries({ queryKey: ["report-settings"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Erro ao salvar"),
+  });
+
+  const s = settings.data;
+  const [limit, setLimit] = useState<string>("");
+  const currentLimit = s?.ai_daily_limit ?? 50;
+  const effectiveLimit = limit === "" ? currentLimit : Number(limit);
+
+  return (
+    <div className="max-w-3xl grid gap-5">
+      <Card className="p-6 md:p-8">
+        <div className="flex items-start gap-4">
+          <div className="rounded-xl bg-primary-soft text-primary p-3"><Bot className="size-5" /></div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-display text-xl font-semibold text-foreground">Assistente de IA</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Quando desligada, a página <b>/ia</b> bloqueia novas consultas — os relatórios por modelo continuam funcionando normalmente.
+            </p>
+          </div>
+          <Switch
+            checked={!!s?.ai_enabled}
+            disabled={settings.isLoading || save.isPending}
+            onCheckedChange={(v) => save.mutate({ ai_enabled: v, ai_daily_limit: currentLimit })}
+          />
+        </div>
+      </Card>
+
+      <Card className="p-6 md:p-8">
+        <div className="flex items-start gap-4 mb-5">
+          <div className="rounded-xl bg-primary-soft text-primary p-3"><ShieldCheck className="size-5" /></div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-display text-xl font-semibold text-foreground">Limite diário de consultas de IA</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Protege o orçamento de créditos. Contagem reinicia à meia-noite.
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="rounded-xl border border-border bg-background p-4">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">Usado hoje</p>
+            <p className="font-display text-3xl font-bold text-primary mt-2 tabular-nums">{used.data ?? 0}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-background p-4">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">Limite atual</p>
+            <p className="font-display text-3xl font-bold text-foreground mt-2 tabular-nums">{currentLimit}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-background p-4">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">Restante</p>
+            <p className="font-display text-3xl font-bold text-foreground mt-2 tabular-nums">
+              {Math.max(0, currentLimit - (used.data ?? 0))}
+            </p>
+          </div>
+        </div>
+        <div className="mt-5 flex flex-wrap items-end gap-3">
+          <div className="flex-1 min-w-[200px]">
+            <Label>Novo limite diário</Label>
+            <Input
+              type="number"
+              min={1}
+              max={1000}
+              className="mt-1.5"
+              placeholder={String(currentLimit)}
+              value={limit}
+              onChange={(e) => setLimit(e.target.value)}
+            />
+          </div>
+          <Button
+            onClick={() => save.mutate({ ai_enabled: !!s?.ai_enabled, ai_daily_limit: effectiveLimit })}
+            disabled={save.isPending || !Number.isFinite(effectiveLimit) || effectiveLimit < 1}
+          >
+            {save.isPending ? <Loader2 className="size-4 animate-spin" /> : "Salvar limite"}
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+/* ============ Logs panel ============ */
+function LogsPanel() {
+  const qc = useQueryClient();
+  const logs = useQuery({ queryKey: ["report-logs"], queryFn: () => listReportLogs(200) });
+  const del = useMutation({
+    mutationFn: deleteReportLog,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["report-logs"] }),
+  });
+  const clearAll = useMutation({
+    mutationFn: clearReportLogs,
+    onSuccess: () => {
+      toast.success("Histórico limpo");
+      qc.invalidateQueries({ queryKey: ["report-logs"] });
+    },
+  });
+
+  const rows = logs.data ?? [];
+  const totalAi = rows.filter((r) => r.kind === "ai").length;
+  const totalTpl = rows.filter((r) => r.kind === "template").length;
+  const totalExp = rows.filter((r) => !!r.export_format).length;
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Card className="p-4">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">Total</p>
+          <p className="font-display text-3xl font-bold text-primary mt-2 tabular-nums">{rows.length}</p>
+        </Card>
+        <Card className="p-4">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">Modelos</p>
+          <p className="font-display text-3xl font-bold text-foreground mt-2 tabular-nums">{totalTpl}</p>
+        </Card>
+        <Card className="p-4">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">Consultas IA</p>
+          <p className="font-display text-3xl font-bold text-foreground mt-2 tabular-nums">{totalAi}</p>
+        </Card>
+        <Card className="p-4">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">Exportações</p>
+          <p className="font-display text-3xl font-bold text-foreground mt-2 tabular-nums">{totalExp}</p>
+        </Card>
+      </div>
+
+      <Card className="p-0 overflow-hidden">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-background">
+          <h3 className="font-display text-lg font-semibold text-foreground">
+            Histórico de relatórios
+            <span className="ml-2 text-sm font-normal text-muted-foreground">({rows.length})</span>
+          </h3>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => {
+              if (confirm("Apagar todo o histórico?")) clearAll.mutate();
+            }}
+            disabled={rows.length === 0 || clearAll.isPending}
+          >
+            <Trash2 className="size-4" /> Limpar
+          </Button>
+        </div>
+        {logs.isLoading ? (
+          <div className="p-10 text-center text-muted-foreground text-sm">
+            <Loader2 className="size-5 animate-spin inline mr-2" /> Carregando…
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="p-10 text-center text-muted-foreground text-sm">
+            Nenhum relatório gerado ainda.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-secondary/60 text-muted-foreground border-b border-border">
+                  <th className="text-left px-4 py-3 font-semibold text-[10px] uppercase tracking-[0.16em]">Data</th>
+                  <th className="text-left px-4 py-3 font-semibold text-[10px] uppercase tracking-[0.16em]">Tipo</th>
+                  <th className="text-left px-4 py-3 font-semibold text-[10px] uppercase tracking-[0.16em]">Título / Pergunta</th>
+                  <th className="text-left px-4 py-3 font-semibold text-[10px] uppercase tracking-[0.16em]">Registros</th>
+                  <th className="text-left px-4 py-3 font-semibold text-[10px] uppercase tracking-[0.16em]">Exportação</th>
+                  <th className="w-10"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.id} className="border-b border-border last:border-0 hover:bg-primary-soft/20">
+                    <td className="px-4 py-2.5 whitespace-nowrap text-muted-foreground tabular-nums">
+                      {new Date(r.created_at).toLocaleString("pt-BR")}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {r.kind === "ai" ? (
+                        <Badge className="bg-accent/20 text-accent-foreground border-accent/40" variant="outline">
+                          <Bot className="size-3 mr-1" /> IA
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="border-border">
+                          <FileText className="size-3 mr-1" /> Modelo
+                        </Badge>
+                      )}
+                    </td>
+                    <td className="px-4 py-2.5 max-w-[420px]">
+                      <p className="text-foreground truncate" title={r.title}>{r.title}</p>
+                      {r.question && r.question !== r.title && (
+                        <p className="text-xs text-muted-foreground truncate" title={r.question}>{r.question}</p>
+                      )}
+                    </td>
+                    <td className="px-4 py-2.5 tabular-nums text-foreground">
+                      {r.row_count ?? "—"}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {r.export_format ? (
+                        <Badge variant="outline" className="uppercase text-[10px]">{r.export_format}</Badge>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </td>
+                    <td className="px-2 py-2.5">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => del.mutate(r.id)}
+                      >
+                        <X className="size-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
 
 function EmptyPreview({ onGenerate, template }: { onGenerate: () => void; template: ReportTemplate }) {
   const Icon = ICONS[template.icon] ?? FileText;
