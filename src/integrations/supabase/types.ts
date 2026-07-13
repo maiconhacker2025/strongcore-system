@@ -362,6 +362,33 @@ export type Database = {
         }
         Relationships: []
       }
+      report_views: {
+        Row: {
+          created_at: string
+          filters: Json
+          id: string
+          name: string
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          name: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          name?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
