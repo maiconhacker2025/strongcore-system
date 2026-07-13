@@ -902,3 +902,164 @@ function FiltersSheet({
     </SheetContent>
   );
 }
+
+/* ============ Views (saved filters) ============ */
+function ViewsMenu({
+  templateId, filters, onApply,
+}: {
+  templateId: string;
+  filters: ReportFilters;
+  onApply: (v: ReportView) => void;
+}) {
+  const qc = useQueryClient();
+  const views = useQuery({ queryKey: ["report-views"], queryFn: listReportViews });
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [bindTemplate, setBindTemplate] = useState(true);
+
+  const save = useMutation({
+    mutationFn: () => createReportView({
+      name: name.trim(),
+      template_id: bindTemplate ? templateId : null,
+      filters,
+    }),
+    onSuccess: () => {
+      toast.success("Vista salva");
+      setSaveOpen(false);
+      setName("");
+      qc.invalidateQueries({ queryKey: ["report-views"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Erro ao salvar vista"),
+  });
+
+  const overwrite = useMutation({
+    mutationFn: (v: ReportView) => updateReportView(v.id, {
+      template_id: bindTemplate ? templateId : v.template_id,
+      filters,
+    }),
+    onSuccess: () => {
+      toast.success("Vista atualizada");
+      qc.invalidateQueries({ queryKey: ["report-views"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Erro ao atualizar"),
+  });
+
+  const del = useMutation({
+    mutationFn: deleteReportView,
+    onSuccess: () => {
+      toast.success("Vista removida");
+      qc.invalidateQueries({ queryKey: ["report-views"] });
+    },
+  });
+
+  const list = views.data ?? [];
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="gap-2">
+            <Bookmark className="size-4" /> Vistas
+            {list.length > 0 && (
+              <Badge className="ml-1 h-5 min-w-5 px-1.5 bg-secondary text-secondary-foreground">
+                {list.length}
+              </Badge>
+            )}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-72">
+          <DropdownMenuLabel>Vistas salvas</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {list.length === 0 ? (
+            <div className="px-2 py-4 text-xs text-muted-foreground text-center">
+              Nenhuma vista salva ainda.
+            </div>
+          ) : (
+            list.map((v) => {
+              const tpl = v.template_id ? getTemplate(v.template_id) : null;
+              return (
+                <div
+                  key={v.id}
+                  className="group flex items-center gap-1 px-2 py-1.5 rounded-md hover:bg-muted cursor-pointer"
+                  onClick={() => onApply(v)}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{v.name}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">
+                      {tpl ? tpl.name : "Sem modelo fixo"}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost" size="icon" className="size-7 opacity-0 group-hover:opacity-100"
+                    title="Sobrescrever com filtros atuais"
+                    onClick={(e) => { e.stopPropagation(); overwrite.mutate(v); }}
+                  >
+                    <Save className="size-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost" size="icon" className="size-7 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm(`Apagar a vista "${v.name}"?`)) del.mutate(v.id);
+                    }}
+                  >
+                    <X className="size-3.5" />
+                  </Button>
+                </div>
+              );
+            })
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onSelect={(e) => { e.preventDefault(); setSaveOpen(true); }}
+            className="gap-2"
+          >
+            <BookmarkPlus className="size-4" /> Salvar filtros atuais como vista…
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BookmarkPlus className="size-5 text-primary" /> Salvar vista
+            </DialogTitle>
+            <DialogDescription>
+              As vistas ficam disponíveis para toda a equipe.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Nome da vista</Label>
+              <Input
+                autoFocus
+                className="mt-1.5"
+                placeholder="Ex: Ativos - Alto risco - Centro"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) save.mutate(); }}
+              />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border p-3">
+              <div>
+                <p className="text-sm font-medium text-foreground">Associar ao modelo atual</p>
+                <p className="text-xs text-muted-foreground">
+                  Ao aplicar, também seleciona “{getTemplate(templateId)?.name ?? templateId}”.
+                </p>
+              </div>
+              <Switch checked={bindTemplate} onCheckedChange={setBindTemplate} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSaveOpen(false)}>Cancelar</Button>
+            <Button onClick={() => save.mutate()} disabled={!name.trim() || save.isPending}>
+              {save.isPending ? <Loader2 className="size-4 animate-spin" /> : "Salvar vista"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
