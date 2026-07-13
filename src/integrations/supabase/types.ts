@@ -305,6 +305,63 @@ export type Database = {
         }
         Relationships: []
       }
+      report_logs: {
+        Row: {
+          created_at: string
+          export_format: string | null
+          filters: Json | null
+          id: string
+          kind: string
+          question: string | null
+          row_count: number | null
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          export_format?: string | null
+          filters?: Json | null
+          id?: string
+          kind: string
+          question?: string | null
+          row_count?: number | null
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          export_format?: string | null
+          filters?: Json | null
+          id?: string
+          kind?: string
+          question?: string | null
+          row_count?: number | null
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      report_settings: {
+        Row: {
+          ai_daily_limit: number
+          ai_enabled: boolean
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          ai_daily_limit?: number
+          ai_enabled?: boolean
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          ai_daily_limit?: number
+          ai_enabled?: boolean
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

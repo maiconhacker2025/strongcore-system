@@ -14,6 +14,8 @@ import { Sparkles, Send, Loader2, FileText, FileSpreadsheet, FileType2, Bot, Use
 import { toast } from "sonner";
 import { askDataAi } from "@/lib/data-ai.functions";
 import { exportPdf, exportDocx, exportXlsx, type ReportTable, type ReportData } from "@/lib/export-report";
+import { logReport } from "@/lib/reports-admin";
+
 
 export const Route = createFileRoute("/ia")({
   component: () => <AppShell><IAPage /></AppShell>,
@@ -227,11 +229,19 @@ function ExportMenu({ question, answer, tables }: { question: string; answer: st
       if (fmt === "pdf") await exportPdf(data);
       if (fmt === "docx") await exportDocx(data);
       if (fmt === "xlsx") await exportXlsx(data);
+      await logReport({
+        kind: "ai",
+        title: data.title,
+        question,
+        row_count: totalRows,
+        export_format: fmt,
+      });
       setTimeout(() => setOpen(false), 400);
     } finally {
       setBusy(null);
     }
   };
+
 
   const formats: { id: "pdf" | "docx" | "xlsx"; label: string; desc: string; Icon: any; color: string }[] = [
     { id: "pdf",  label: "PDF",   desc: "Pronto para imprimir ou enviar por e-mail", Icon: FileType2,       color: "bg-red-500/10 text-red-600" },

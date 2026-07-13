@@ -211,7 +211,24 @@ export const askDataAi = createServerFn({ method: "POST" })
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) return { reply: "LOVABLE_API_KEY não configurada.", tables: [] };
 
+    // Enforce settings: AI toggle + daily limit
+    const { data: settings } = await supabaseAdmin
+      .from("report_settings").select("ai_enabled, ai_daily_limit").eq("id", 1).maybeSingle();
+    const aiEnabled = settings?.ai_enabled ?? true;
+    const dailyLimit = settings?.ai_daily_limit ?? 50;
+    if (!aiEnabled) {
+      return { reply: "A assistente de IA está **desativada** nas configurações de Relatórios. Ative-a para consultar dados por linguagem natural.", tables: [] };
+    }
+    const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
+    const { count: usedToday } = await supabaseAdmin
+      .from("report_logs").select("*", { count: "exact", head: true })
+      .eq("kind", "ai").gte("created_at", startOfDay.toISOString());
+    if ((usedToday ?? 0) >= dailyLimit) {
+      return { reply: `Limite diário de **${dailyLimit} consultas de IA** atingido. Ajuste em Relatórios → Configurações ou tente novamente amanhã.`, tables: [] };
+    }
+
     const tables: { title: string; columns: string[]; rows: any[] }[] = [];
+
 
     const convo: Msg[] = [
       { role: "system", content: SYSTEM_PROMPT },
@@ -276,7 +293,17 @@ export const askDataAi = createServerFn({ method: "POST" })
         continue;
       }
 
-      return { reply: String(msg.content ?? ""), tables };
+      const finalReply = String(msg.content ?? "");
+      const lastUser = [...data.messages].reverse().find((m) => m.role === "user")?.content ?? "";
+      const rowCount = tables.reduce((acc, t) => acc + (t.rows?.length ?? 0), 0);
+      await supabaseAdmin.from("report_logs").insert({
+        kind: "ai",
+        title: lastUser.slice(0, 120) || "Consulta IA",
+        question: lastUser,
+        row_count: rowCount,
+      });
+      return { reply: finalReply, tables };
+
     }
 
     return { reply: "Não consegui concluir a consulta. Tente reformular a pergunta.", tables };
