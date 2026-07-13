@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
@@ -19,15 +20,22 @@ import {
   LayoutDashboard, UserCheck, UserMinus, GraduationCap, School, Clock,
   MapPin, ShieldAlert, Users as UsersIcon, Cake, PartyPopper, LogIn, LogOut,
   Pill, AlertTriangle, Phone, ArrowRight, X, ChevronRight,
+  Bot, Settings2, History, Trash2, ShieldCheck,
 } from "lucide-react";
 import { REPORT_TEMPLATES, type ReportTemplate, type ReportFilters, getTemplate } from "@/lib/reports";
 import type { FullReport } from "@/lib/reports-export";
 import { exportReportPdf, exportReportXlsx, exportReportDocx } from "@/lib/reports-export";
+import {
+  getReportSettings, updateReportSettings, logReport,
+  listReportLogs, deleteReportLog, clearReportLogs, countAiToday,
+} from "@/lib/reports-admin";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/relatorios")({
   component: () => <AppShell><RelatoriosPage /></AppShell>,
 });
+
 
 const ICONS: Record<string, any> = {
   "layout-dashboard": LayoutDashboard, "user-check": UserCheck, "user-minus": UserMinus,
