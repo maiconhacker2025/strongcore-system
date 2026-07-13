@@ -53,6 +53,7 @@ const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 8 }, (_, i) => String(CURRENT_YEAR - i));
 
 function RelatoriosPage() {
+  const [tab, setTab] = useState<"modelos" | "config" | "logs">("modelos");
   const [selectedId, setSelectedId] = useState<string>("panorama");
   const [filters, setFilters] = useState<ReportFilters>({ status: "todos" });
   const [report, setReport] = useState<FullReport | null>(null);
@@ -61,10 +62,20 @@ function RelatoriosPage() {
   const selected = useMemo(() => getTemplate(selectedId)!, [selectedId]);
 
   const gen = useMutation({
-    mutationFn: async (t: ReportTemplate) => t.build(filters),
+    mutationFn: async (t: ReportTemplate) => {
+      const r = await t.build(filters);
+      await logReport({
+        kind: "template",
+        title: r.title,
+        filters,
+        row_count: r.rows.length,
+      });
+      return r;
+    },
     onSuccess: (r) => setReport(r),
-    onError: (e: any) => alert(`Erro ao gerar relatório: ${e?.message ?? e}`),
+    onError: (e: any) => toast.error(`Erro ao gerar relatório: ${e?.message ?? e}`),
   });
+
 
   const generate = (id?: string) => {
     const t = id ? getTemplate(id) : selected;
