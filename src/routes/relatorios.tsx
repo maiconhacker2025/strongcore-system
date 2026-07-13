@@ -137,6 +137,15 @@ function RelatoriosPage() {
             <div className="flex items-center gap-2 shrink-0">
               {tab === "modelos" && (
                 <>
+                  <ViewsMenu
+                    templateId={selectedId}
+                    filters={filters}
+                    onApply={(v) => {
+                      if (v.template_id) setSelectedId(v.template_id);
+                      setFilters(v.filters);
+                      toast.success(`Vista "${v.name}" aplicada`);
+                    }}
+                  />
                   <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
                     <SheetTrigger asChild>
                       <Button variant="outline" className="gap-2">
@@ -160,6 +169,7 @@ function RelatoriosPage() {
                   </Button>
                 </>
               )}
+
             </div>
           </div>
 
