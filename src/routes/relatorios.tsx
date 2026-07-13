@@ -563,15 +563,16 @@ function ReportPreview({ report, onRegenerate }: { report: FullReport; onRegener
             </div>
           </div>
           <div className="flex flex-wrap gap-2 shrink-0">
-            <Button variant="outline" onClick={() => exportReportPdf(report)} className="gap-2">
+            <Button variant="outline" onClick={() => { exportReportPdf(report); logReport({ kind: "template", title: report.title, row_count: report.rows.length, export_format: "pdf" }); }} className="gap-2">
               <FileType2 className="size-4" /> PDF
             </Button>
-            <Button variant="outline" onClick={() => exportReportXlsx(report)} className="gap-2">
+            <Button variant="outline" onClick={() => { exportReportXlsx(report); logReport({ kind: "template", title: report.title, row_count: report.rows.length, export_format: "xlsx" }); }} className="gap-2">
               <FileSpreadsheet className="size-4" /> Excel
             </Button>
-            <Button variant="outline" onClick={() => exportReportDocx(report)} className="gap-2">
+            <Button variant="outline" onClick={() => { exportReportDocx(report); logReport({ kind: "template", title: report.title, row_count: report.rows.length, export_format: "docx" }); }} className="gap-2">
               <FileText className="size-4" /> Word
             </Button>
+
           </div>
         </div>
       </Card>
