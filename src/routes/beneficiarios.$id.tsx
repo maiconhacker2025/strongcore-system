@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
-import { BeneficiarioForm, type Beneficiario } from "@/components/BeneficiarioForm";
+import { BeneficiarioForm, type Beneficiario, type FormHandle } from "@/components/BeneficiarioForm";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save, Trash2, Loader2, UserCheck, UserMinus } from "lucide-react";
 import { toast } from "sonner";
+import { awardSave } from "@/lib/gamification";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
