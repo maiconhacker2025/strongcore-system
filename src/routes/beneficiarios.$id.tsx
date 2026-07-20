@@ -24,6 +24,7 @@ function EditPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [form, setForm] = useState<Beneficiario | null>(null);
+  const formRef = useRef<FormHandle>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["beneficiario", id],
@@ -44,6 +45,11 @@ function EditPage() {
     },
     onSuccess: () => {
       toast.success("Alterações salvas");
+      awardSave({
+        fieldsFilled: formRef.current?.filledFields() ?? 0,
+        totalFields: formRef.current?.totalFields ?? 0,
+        startedAt: formRef.current?.startedAt ?? null,
+      });
       qc.invalidateQueries({ queryKey: ["beneficiario", id] });
       qc.invalidateQueries({ queryKey: ["beneficiarios"] });
     },
