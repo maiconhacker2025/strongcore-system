@@ -14,6 +14,91 @@ export type Database = {
   }
   public: {
     Tables: {
+      beneficiario_arquivos: {
+        Row: {
+          beneficiario_id: string
+          categoria: string
+          created_at: string
+          id: string
+          mime: string | null
+          nome: string
+          path: string
+          tamanho: number | null
+        }
+        Insert: {
+          beneficiario_id: string
+          categoria?: string
+          created_at?: string
+          id?: string
+          mime?: string | null
+          nome: string
+          path: string
+          tamanho?: number | null
+        }
+        Update: {
+          beneficiario_id?: string
+          categoria?: string
+          created_at?: string
+          id?: string
+          mime?: string | null
+          nome?: string
+          path?: string
+          tamanho?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiario_arquivos_beneficiario_id_fkey"
+            columns: ["beneficiario_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beneficiario_eventos: {
+        Row: {
+          autor: string | null
+          beneficiario_id: string
+          created_at: string
+          data: string
+          descricao: string | null
+          id: string
+          tipo: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          autor?: string | null
+          beneficiario_id: string
+          created_at?: string
+          data?: string
+          descricao?: string | null
+          id?: string
+          tipo?: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          autor?: string | null
+          beneficiario_id?: string
+          created_at?: string
+          data?: string
+          descricao?: string | null
+          id?: string
+          tipo?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiario_eventos_beneficiario_id_fkey"
+            columns: ["beneficiario_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       beneficiarios: {
         Row: {
           agua: string | null
