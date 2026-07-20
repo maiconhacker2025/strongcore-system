@@ -261,6 +261,21 @@ export function BeneficiarioForm({
 
   const isFilled = (v: any) => v !== null && v !== undefined && v !== "" && v !== false;
 
+  const totalFields = sections.reduce((s, sec) => s + sec.fields.length, 0);
+  const totalFilled = sections.reduce(
+    (s, sec) => s + sec.fields.filter((f) => isFilled(value[f.name])).length, 0);
+  const globalPct = Math.round((totalFilled / Math.max(1, totalFields)) * 100);
+
+  const sectionId = (t: string) =>
+    "sec-" + t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-");
+
+  const q = fieldQuery.trim().toLowerCase();
+  const displaySections = q
+    ? orderedSections
+        .map((sec) => ({ ...sec, fields: sec.fields.filter((f) => f.label.toLowerCase().includes(q)) }))
+        .filter((sec) => sec.fields.length > 0)
+    : orderedSections;
+
   return (
     <div className="space-y-6">
       <Card className="p-4 flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
@@ -288,11 +303,66 @@ export function BeneficiarioForm({
         </div>
       </Card>
 
-      {orderedSections.map((sec) => {
+      {/* Sticky nav: busca + progresso global + atalhos por seção */}
+      <div className="sticky top-2 z-20 rounded-xl border bg-background/95 backdrop-blur p-3 shadow-sm space-y-3">
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1 min-w-[180px]">
+            <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              className="pl-9 h-9"
+              placeholder="Buscar campo (ex: CPF, mãe, geladeira…)"
+              value={fieldQuery}
+              onChange={(e) => setFieldQuery(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center gap-2 whitespace-nowrap">
+            <div className="h-2 w-32 rounded-full bg-muted overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-primary to-success transition-all" style={{ width: `${globalPct}%` }} />
+            </div>
+            <span className="text-xs font-medium tabular-nums text-muted-foreground">
+              {totalFilled}/{totalFields} · {globalPct}%
+            </span>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {sections.map((sec) => {
+            const done = sec.fields.filter((f) => isFilled(value[f.name])).length;
+            const full = done === sec.fields.length;
+            return (
+              <a
+                key={sec.title}
+                href={`#${sectionId(sec.title)}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById(sectionId(sec.title))?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className={cn(
+                  "text-[11px] px-2.5 py-1 rounded-full border transition-colors",
+                  full
+                    ? "bg-success/10 border-success/40 text-success"
+                    : done > 0
+                    ? "bg-primary/5 border-primary/30 text-foreground"
+                    : "bg-muted border-border text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {sec.title} <span className="tabular-nums opacity-70">{done}/{sec.fields.length}</span>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+
+      {displaySections.length === 0 && (
+        <Card className="p-8 text-center text-sm text-muted-foreground">
+          Nenhum campo encontrado para “{fieldQuery}”.
+        </Card>
+      )}
+
+      {displaySections.map((sec) => {
         const filledCount = sec.fields.filter((f) => isFilled(value[f.name])).length;
         const pct = Math.round((filledCount / sec.fields.length) * 100);
         return (
-        <Card key={sec.title} className="p-6 overflow-hidden relative">
+        <Card key={sec.title} id={sectionId(sec.title)} className="p-6 overflow-hidden relative scroll-mt-40">
           <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/60 to-accent" />
           <div className="flex items-center justify-between mb-4 pl-2">
             <div>
