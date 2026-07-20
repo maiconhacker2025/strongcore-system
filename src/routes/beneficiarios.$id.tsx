@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { BeneficiarioForm, type Beneficiario, type FormHandle } from "@/components/BeneficiarioForm";
+import { BeneficiarioTimeline } from "@/components/BeneficiarioTimeline";
+import { BeneficiarioArquivos } from "@/components/BeneficiarioArquivos";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save, Trash2, Loader2, UserCheck, UserMinus } from "lucide-react";
 import { toast } from "sonner";
@@ -139,14 +142,28 @@ function EditPage() {
         </div>
       </header>
 
-      <BeneficiarioForm ref={formRef} value={form} onChange={setForm} />
-
-      <div className="mt-6 flex justify-end">
-        <Button onClick={() => saveMut.mutate(form)} disabled={saveMut.isPending} size="lg">
-          {saveMut.isPending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-          Salvar alterações
-        </Button>
-      </div>
+      <Tabs defaultValue="ficha" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="ficha">Ficha</TabsTrigger>
+          <TabsTrigger value="timeline">Linha do tempo</TabsTrigger>
+          <TabsTrigger value="arquivos">Fotos & documentos</TabsTrigger>
+        </TabsList>
+        <TabsContent value="ficha">
+          <BeneficiarioForm ref={formRef} value={form} onChange={setForm} />
+          <div className="mt-6 flex justify-end">
+            <Button onClick={() => saveMut.mutate(form)} disabled={saveMut.isPending} size="lg">
+              {saveMut.isPending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+              Salvar alterações
+            </Button>
+          </div>
+        </TabsContent>
+        <TabsContent value="timeline">
+          <BeneficiarioTimeline beneficiarioId={id} />
+        </TabsContent>
+        <TabsContent value="arquivos">
+          <BeneficiarioArquivos beneficiarioId={id} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
