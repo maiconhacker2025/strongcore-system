@@ -452,6 +452,7 @@ export const BeneficiarioForm = forwardRef<FormHandle, {
                     <Textarea
                       id={f.name}
                       value={v ?? ""}
+                      data-nav="1"
                       onFocus={() => trackFocus(f.name)}
                       onChange={(e) => set(f.name, e.target.value || null)}
                       rows={4}
@@ -474,8 +475,10 @@ export const BeneficiarioForm = forwardRef<FormHandle, {
                     id={f.name}
                     type={f.type ?? "text"}
                     value={v ?? ""}
+                    data-nav="1"
                     list={f.suggest ? `${f.name}-suggestions` : undefined}
                     onFocus={() => trackFocus(f.name)}
+                    onKeyDown={handleKeyDown}
                     onChange={(e) => {
                       const raw = e.target.value;
                       if (f.type === "number") set(f.name, raw === "" ? null : Number(raw));
@@ -498,4 +501,5 @@ export const BeneficiarioForm = forwardRef<FormHandle, {
       })}
     </div>
   );
-}
+});
+
