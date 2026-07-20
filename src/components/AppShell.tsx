@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Users, LayoutDashboard, UserPlus, Sparkles, Download,
-  UserCheck, UserMinus, FileBarChart2, Award,
+  UserCheck, UserMinus, FileBarChart2, Award, AlertTriangle, FileSpreadsheet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { QuickSearch } from "@/components/QuickSearch";
@@ -26,6 +26,8 @@ const navGroups = [
     label: "Operacional",
     items: [
       { to: "/beneficiarios/novo", label: "Cadastrar", icon: UserPlus },
+      { to: "/importar", label: "Importar planilha", icon: FileSpreadsheet },
+      { to: "/alertas", label: "Central de Alertas", icon: AlertTriangle },
       { to: "/relatorios", label: "Relatórios", icon: FileBarChart2 },
       { to: "/ia", label: "Assistente IA", icon: Sparkles },
     ],

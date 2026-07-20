@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
+import { Route as ImportarRouteImport } from './routes/importar'
 import { Route as IaRouteImport } from './routes/ia'
+import { Route as AlertasRouteImport } from './routes/alertas'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BeneficiariosIndexRouteImport } from './routes/beneficiarios.index'
 import { Route as BeneficiariosNovoRouteImport } from './routes/beneficiarios.novo'
@@ -21,9 +23,19 @@ const RelatoriosRoute = RelatoriosRouteImport.update({
   path: '/relatorios',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ImportarRoute = ImportarRouteImport.update({
+  id: '/importar',
+  path: '/importar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IaRoute = IaRouteImport.update({
   id: '/ia',
   path: '/ia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlertasRoute = AlertasRouteImport.update({
+  id: '/alertas',
+  path: '/alertas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -49,7 +61,9 @@ const BeneficiariosIdRoute = BeneficiariosIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/alertas': typeof AlertasRoute
   '/ia': typeof IaRoute
+  '/importar': typeof ImportarRoute
   '/relatorios': typeof RelatoriosRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
@@ -57,7 +71,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/alertas': typeof AlertasRoute
   '/ia': typeof IaRoute
+  '/importar': typeof ImportarRoute
   '/relatorios': typeof RelatoriosRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
@@ -66,7 +82,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/alertas': typeof AlertasRoute
   '/ia': typeof IaRoute
+  '/importar': typeof ImportarRoute
   '/relatorios': typeof RelatoriosRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
@@ -76,7 +94,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/alertas'
     | '/ia'
+    | '/importar'
     | '/relatorios'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
@@ -84,7 +104,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/alertas'
     | '/ia'
+    | '/importar'
     | '/relatorios'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
@@ -92,7 +114,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/alertas'
     | '/ia'
+    | '/importar'
     | '/relatorios'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
@@ -101,7 +125,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AlertasRoute: typeof AlertasRoute
   IaRoute: typeof IaRoute
+  ImportarRoute: typeof ImportarRoute
   RelatoriosRoute: typeof RelatoriosRoute
   BeneficiariosIdRoute: typeof BeneficiariosIdRoute
   BeneficiariosNovoRoute: typeof BeneficiariosNovoRoute
@@ -117,11 +143,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RelatoriosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/importar': {
+      id: '/importar'
+      path: '/importar'
+      fullPath: '/importar'
+      preLoaderRoute: typeof ImportarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ia': {
       id: '/ia'
       path: '/ia'
       fullPath: '/ia'
       preLoaderRoute: typeof IaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/alertas': {
+      id: '/alertas'
+      path: '/alertas'
+      fullPath: '/alertas'
+      preLoaderRoute: typeof AlertasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -157,7 +197,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AlertasRoute: AlertasRoute,
   IaRoute: IaRoute,
+  ImportarRoute: ImportarRoute,
   RelatoriosRoute: RelatoriosRoute,
   BeneficiariosIdRoute: BeneficiariosIdRoute,
   BeneficiariosNovoRoute: BeneficiariosNovoRoute,
