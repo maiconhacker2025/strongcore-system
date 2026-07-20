@@ -1089,3 +1089,150 @@ function ViewsMenu({
   );
 }
 
+/* ============ Columns picker ============ */
+function ColumnsSheet({
+  value, onChange, onClose, isCustom,
+}: {
+  value: string[];
+  onChange: (cols: string[] | null) => void;
+  onClose: () => void;
+  isCustom: boolean;
+}) {
+  const [draft, setDraft] = useState<string[]>(value);
+  const [search, setSearch] = useState("");
+
+  const toggle = (key: string) => {
+    setDraft((d) => (d.includes(key) ? d.filter((k) => k !== key) : [...d, key]));
+  };
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return COLUMN_GROUPS;
+    return COLUMN_GROUPS
+      .map((g) => ({
+        ...g,
+        columns: g.columns.filter(
+          (c) => c.label.toLowerCase().includes(q) || c.key.toLowerCase().includes(q),
+        ),
+      }))
+      .filter((g) => g.columns.length > 0);
+  }, [search]);
+
+  const apply = () => {
+    onChange(draft.length ? draft : null);
+    onClose();
+    toast.success(
+      draft.length ? `${draft.length} coluna(s) selecionada(s)` : "Colunas padrão do modelo",
+    );
+  };
+
+  const resetTemplate = () => {
+    onChange(null);
+    onClose();
+    toast.success("Colunas do modelo restauradas");
+  };
+
+  return (
+    <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto flex flex-col">
+      <SheetHeader>
+        <SheetTitle className="font-display flex items-center gap-2 text-xl">
+          <Columns3 className="size-4 text-primary" /> Colunas do relatório
+        </SheetTitle>
+        <p className="text-xs text-muted-foreground">
+          Escolha exatamente o que aparece na planilha, PDF ou Word. Vale para qualquer modelo.
+        </p>
+      </SheetHeader>
+
+      <div className="mt-4 space-y-3">
+        <div className="relative">
+          <SearchIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            className="pl-9"
+            placeholder="Buscar coluna (ex: cpf, rg, mãe…)"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-2">
+            Modelos rápidos
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {COLUMN_PRESETS.map((p) => (
+              <Button
+                key={p.id}
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => setDraft(p.columns)}
+                title={p.description}
+              >
+                {p.name}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-muted-foreground">
+            <b className="text-foreground">{draft.length}</b> coluna(s) selecionada(s)
+          </span>
+          <div className="flex gap-2">
+            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setDraft([])}>
+              Limpar
+            </Button>
+            <Button
+              size="sm" variant="ghost" className="h-7 text-xs"
+              onClick={() => setDraft(COLUMN_GROUPS.flatMap((g) => g.columns.map((c) => c.key)))}
+            >
+              Tudo
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 space-y-5 flex-1">
+        {filtered.map((g) => (
+          <div key={g.title}>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-2">
+              {g.title}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+              {g.columns.map((c) => {
+                const on = draft.includes(c.key);
+                return (
+                  <label
+                    key={c.key}
+                    className={cn(
+                      "flex items-center gap-2 rounded-md border px-3 py-2 cursor-pointer transition-colors text-sm",
+                      on
+                        ? "border-primary/40 bg-primary-soft text-foreground"
+                        : "border-border hover:bg-muted",
+                    )}
+                  >
+                    <Checkbox checked={on} onCheckedChange={() => toggle(c.key)} />
+                    <span className="truncate">{c.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="sticky bottom-0 bg-background pt-4 mt-4 border-t border-border flex items-center gap-2">
+        {isCustom && (
+          <Button variant="outline" onClick={resetTemplate} className="gap-2">
+            <RotateCcw className="size-4" /> Modelo
+          </Button>
+        )}
+        <Button onClick={apply} className="flex-1">
+          Aplicar colunas
+        </Button>
+      </div>
+    </SheetContent>
+  );
+}
+
+
