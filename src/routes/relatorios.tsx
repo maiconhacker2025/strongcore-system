@@ -73,12 +73,17 @@ function RelatoriosPage() {
   const [filters, setFilters] = useState<ReportFilters>({ status: "todos" });
   const [report, setReport] = useState<FullReport | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [columnsOpen, setColumnsOpen] = useState(false);
+  const [customCols, setCustomCols] = useState<string[] | null>(null);
 
   const selected = useMemo(() => getTemplate(selectedId)!, [selectedId]);
 
   const gen = useMutation({
     mutationFn: async (t: ReportTemplate) => {
       const r = await t.build(filters);
+      if (customCols && customCols.length > 0) {
+        r.columns = customCols;
+      }
       await logReport({
         kind: "template",
         title: r.title,
