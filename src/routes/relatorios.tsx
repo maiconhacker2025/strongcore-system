@@ -21,6 +21,7 @@ import {
   MapPin, ShieldAlert, Users as UsersIcon, Cake, PartyPopper, LogIn, LogOut,
   Pill, AlertTriangle, Phone, ArrowRight, X, ChevronRight,
   Bot, Settings2, History, Trash2, ShieldCheck, Bookmark, BookmarkPlus, Save,
+  Columns3, Search as SearchIcon, RotateCcw,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
