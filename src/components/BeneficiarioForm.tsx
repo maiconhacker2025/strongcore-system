@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, RotateCcw, Sparkles } from "lucide-react";
+import { Check, RotateCcw, Sparkles, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
