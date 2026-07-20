@@ -181,22 +181,35 @@ function recordSequence(seq: string[]) {
   saveOrder(o);
 }
 
-export function BeneficiarioForm({
-  value,
-  onChange,
-}: {
+export const BeneficiarioForm = forwardRef<FormHandle, {
   value: Beneficiario;
   onChange: (next: Beneficiario) => void;
-}) {
+}>(function BeneficiarioForm({ value, onChange }, ref) {
   const set = (k: string, v: any) => onChange({ ...value, [k]: v });
   const [adaptive, setAdaptive] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
     return localStorage.getItem("form-adaptive") !== "off";
   });
+  const [quickMode, setQuickMode] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("form-quick") === "on";
+  });
   const [stats, setStats] = useState<OrderStats>(() => loadOrder());
   const sessionSeq = useRef<string[]>([]);
+  const startedAt = useRef<number | null>(null);
   const [suggestions, setSuggestions] = useState<Record<string, string[]>>({});
   const [fieldQuery, setFieldQuery] = useState("");
+
+  const isFilled = (v: any) => v !== null && v !== undefined && v !== "" && v !== false;
+  const totalFields = sections.reduce((s, sec) => s + sec.fields.length, 0);
+  const totalFilled = sections.reduce(
+    (s, sec) => s + sec.fields.filter((f) => isFilled(value[f.name])).length, 0);
+
+  useImperativeHandle(ref, () => ({
+    get startedAt() { return startedAt.current; },
+    totalFields,
+    filledFields: () => totalFilled,
+  }), [totalFields, totalFilled]);
 
   useEffect(() => {
     let cancel = false;
@@ -221,37 +234,54 @@ export function BeneficiarioForm({
     return () => { cancel = true; };
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("form-adaptive", adaptive ? "on" : "off");
-  }, [adaptive]);
+  useEffect(() => { localStorage.setItem("form-adaptive", adaptive ? "on" : "off"); }, [adaptive]);
+  useEffect(() => { localStorage.setItem("form-quick", quickMode ? "on" : "off"); }, [quickMode]);
 
-  // When the form is unmounted (save), persist the sequence learned this session
+  // Persist learned sequence when form unmounts (after save)
   useEffect(() => {
     return () => {
-      if (sessionSeq.current.length >= 3) {
-        recordSequence(sessionSeq.current);
-      }
+      if (sessionSeq.current.length >= 3) recordSequence(sessionSeq.current);
     };
   }, []);
 
   const trackFocus = (name: string) => {
+    if (startedAt.current === null) startedAt.current = Date.now();
     if (!sessionSeq.current.includes(name)) sessionSeq.current.push(name);
   };
 
-  // Compute adaptive ordering: sort fields within each section by learned score
+  // Enter → jump to next visible field (auto-advance like a paper form)
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    const inputs = Array.from(
+      (e.currentTarget.closest("form, .form-scope") as HTMLElement | null)
+        ?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input[data-nav='1'], textarea[data-nav='1']") ?? []
+    );
+    const i = inputs.indexOf(e.currentTarget as any);
+    const next = inputs[i + 1];
+    if (next) { next.focus(); (next as any).select?.(); }
+  };
+
+  const sectionAvgScore = (fs: Field[]) => {
+    const scored = fs.map((f) => stats[f.name]?.score).filter((n) => typeof n === "number") as number[];
+    if (!scored.length) return Number.POSITIVE_INFINITY;
+    return scored.reduce((a, b) => a + b, 0) / scored.length;
+  };
+
   const orderedSections = useMemo(() => {
     if (!adaptive) return sections;
-    return sections.map((sec) => ({
+    const withOrdered = sections.map((sec) => ({
       ...sec,
       fields: [...sec.fields].sort((a, b) => {
-        const sa = stats[a.name];
-        const sb = stats[b.name];
+        const sa = stats[a.name]; const sb = stats[b.name];
         if (!sa && !sb) return 0;
         if (!sa) return 1;
         if (!sb) return -1;
         return sa.score - sb.score;
       }),
     }));
+    // Also reorder sections by average learned score
+    return [...withOrdered].sort((a, b) => sectionAvgScore(a.fields) - sectionAvgScore(b.fields));
   }, [adaptive, stats]);
 
   const resetOrder = () => {
@@ -260,25 +290,33 @@ export function BeneficiarioForm({
     sessionSeq.current = [];
   };
 
-  const isFilled = (v: any) => v !== null && v !== undefined && v !== "" && v !== false;
-
-  const totalFields = sections.reduce((s, sec) => s + sec.fields.length, 0);
-  const totalFilled = sections.reduce(
-    (s, sec) => s + sec.fields.filter((f) => isFilled(value[f.name])).length, 0);
   const globalPct = Math.round((totalFilled / Math.max(1, totalFields)) * 100);
 
   const sectionId = (t: string) =>
     "sec-" + t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-");
 
   const q = fieldQuery.trim().toLowerCase();
-  const displaySections = q
-    ? orderedSections
-        .map((sec) => ({ ...sec, fields: sec.fields.filter((f) => f.label.toLowerCase().includes(q)) }))
-        .filter((sec) => sec.fields.length > 0)
-    : orderedSections;
+  // Quick mode: only show fields that already have learned order (top 15) or are essential
+  const essentials = new Set(["nome", "data_nascimento", "genero", "responsavel", "tel_responsavel", "whatsapp", "bairro", "escola", "escolaridade", "turno"]);
+  const rankedNames = Object.entries(stats)
+    .sort((a, b) => a[1].score - b[1].score)
+    .slice(0, 15)
+    .map(([n]) => n);
+  const quickSet = new Set([...essentials, ...rankedNames]);
+
+  let displaySections = orderedSections;
+  if (q) {
+    displaySections = displaySections
+      .map((sec) => ({ ...sec, fields: sec.fields.filter((f) => f.label.toLowerCase().includes(q)) }))
+      .filter((sec) => sec.fields.length > 0);
+  } else if (quickMode) {
+    displaySections = displaySections
+      .map((sec) => ({ ...sec, fields: sec.fields.filter((f) => quickSet.has(f.name)) }))
+      .filter((sec) => sec.fields.length > 0);
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 form-scope">
       <Card className="p-4 flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
         <div className="flex items-center gap-3">
           <div className="size-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center">
@@ -287,13 +325,20 @@ export function BeneficiarioForm({
           <div>
             <p className="font-semibold text-sm">Formulário inteligente</p>
             <p className="text-xs text-muted-foreground">
-              {adaptive
-                ? "Os campos se reordenam conforme você os preenche — siga a sequência do papel."
+              {quickMode
+                ? "Modo Relâmpago: só os campos essenciais + mais usados. Use Enter para avançar."
+                : adaptive
+                ? "Seções e campos se reordenam pela sua rotina. Enter avança para o próximo."
                 : "Ordem fixa (padrão original)."}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className={cn("flex items-center gap-2 px-3 py-1.5 rounded-lg border", quickMode ? "bg-amber-100 border-amber-400" : "bg-background")}>
+            <Zap className={cn("size-3.5", quickMode ? "text-amber-600" : "text-muted-foreground")} />
+            <Label htmlFor="quick" className="text-xs cursor-pointer">Modo Relâmpago</Label>
+            <Switch id="quick" checked={quickMode} onCheckedChange={setQuickMode} />
+          </div>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-background border">
             <Label htmlFor="adaptive" className="text-xs cursor-pointer">Adaptar à minha ordem</Label>
             <Switch id="adaptive" checked={adaptive} onCheckedChange={setAdaptive} />
@@ -303,6 +348,7 @@ export function BeneficiarioForm({
           </Button>
         </div>
       </Card>
+
 
       {/* Sticky nav: busca + progresso global + atalhos por seção */}
       <div className="sticky top-2 z-20 rounded-xl border bg-background/95 backdrop-blur p-3 shadow-sm space-y-3">
