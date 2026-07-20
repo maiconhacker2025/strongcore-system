@@ -41,7 +41,7 @@ import {
   listReportViews, createReportView, updateReportView, deleteReportView,
   type ReportView,
 } from "@/lib/report-views";
-import { COLUMN_GROUPS, COLUMN_LABELS, COLUMN_PRESETS } from "@/lib/report-columns";
+import { COLUMN_GROUPS, COLUMN_PRESETS } from "@/lib/report-columns";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
