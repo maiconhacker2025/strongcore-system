@@ -8,6 +8,7 @@ import { QuickSearch } from "@/components/QuickSearch";
 import { Button } from "@/components/ui/button";
 import { runFullBackup, daysSinceBackup } from "@/lib/backup";
 import { AuthGate, LogoutButton } from "@/components/AuthGate";
+import { GamificationHUD } from "@/components/GamificationHUD";
 import logo from "@/assets/logo-progredir.jpg";
 import { useEffect, useState } from "react";
 
@@ -106,8 +107,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
 
-        {/* Backup card */}
-        <div className="p-4">
+        {/* Gamification HUD + Backup card */}
+        <div className="p-4 space-y-3">
+          <GamificationHUD />
           <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
             <div className="flex items-center gap-2 mb-2">
               <Award className="size-3.5 text-amber-400" />

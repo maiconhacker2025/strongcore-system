@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
-import { BeneficiarioForm, type Beneficiario } from "@/components/BeneficiarioForm";
+import { BeneficiarioForm, type Beneficiario, type FormHandle } from "@/components/BeneficiarioForm";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { awardSave } from "@/lib/gamification";
 
 export const Route = createFileRoute("/beneficiarios/novo")({
   component: () => (
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/beneficiarios/novo")({
 function NewPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState<Beneficiario>({ nome: "", ativo: true });
+  const formRef = useRef<FormHandle>(null);
 
   const mut = useMutation({
     mutationFn: async (payload: Beneficiario) => {
@@ -31,6 +33,11 @@ function NewPage() {
     },
     onSuccess: (d) => {
       toast.success("Beneficiário cadastrado");
+      awardSave({
+        fieldsFilled: formRef.current?.filledFields() ?? 0,
+        totalFields: formRef.current?.totalFields ?? 0,
+        startedAt: formRef.current?.startedAt ?? null,
+      });
       navigate({ to: "/beneficiarios/$id", params: { id: d.id } });
     },
     onError: (e: any) => toast.error(e.message),
@@ -52,7 +59,7 @@ function NewPage() {
         </Button>
       </header>
 
-      <BeneficiarioForm value={form} onChange={setForm} />
+      <BeneficiarioForm ref={formRef} value={form} onChange={setForm} />
 
       <div className="mt-6 flex justify-end">
         <Button onClick={() => mut.mutate(form)} disabled={mut.isPending} size="lg">

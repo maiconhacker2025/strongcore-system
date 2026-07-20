@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
-import { BeneficiarioForm, type Beneficiario } from "@/components/BeneficiarioForm";
+import { BeneficiarioForm, type Beneficiario, type FormHandle } from "@/components/BeneficiarioForm";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save, Trash2, Loader2, UserCheck, UserMinus } from "lucide-react";
 import { toast } from "sonner";
+import { awardSave } from "@/lib/gamification";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -23,6 +24,7 @@ function EditPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [form, setForm] = useState<Beneficiario | null>(null);
+  const formRef = useRef<FormHandle>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["beneficiario", id],
@@ -43,6 +45,11 @@ function EditPage() {
     },
     onSuccess: () => {
       toast.success("Alterações salvas");
+      awardSave({
+        fieldsFilled: formRef.current?.filledFields() ?? 0,
+        totalFields: formRef.current?.totalFields ?? 0,
+        startedAt: formRef.current?.startedAt ?? null,
+      });
       qc.invalidateQueries({ queryKey: ["beneficiario", id] });
       qc.invalidateQueries({ queryKey: ["beneficiarios"] });
     },
@@ -132,7 +139,7 @@ function EditPage() {
         </div>
       </header>
 
-      <BeneficiarioForm value={form} onChange={setForm} />
+      <BeneficiarioForm ref={formRef} value={form} onChange={setForm} />
 
       <div className="mt-6 flex justify-end">
         <Button onClick={() => saveMut.mutate(form)} disabled={saveMut.isPending} size="lg">
