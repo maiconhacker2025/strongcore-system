@@ -107,8 +107,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
 
-        {/* Backup card */}
-        <div className="p-4">
+        {/* Gamification HUD + Backup card */}
+        <div className="p-4 space-y-3">
+          <GamificationHUD />
           <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
             <div className="flex items-center gap-2 mb-2">
               <Award className="size-3.5 text-amber-400" />
