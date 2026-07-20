@@ -18,6 +18,7 @@ export const Route = createFileRoute("/beneficiarios/novo")({
 function NewPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState<Beneficiario>({ nome: "", ativo: true });
+  const formRef = useRef<FormHandle>(null);
 
   const mut = useMutation({
     mutationFn: async (payload: Beneficiario) => {
@@ -32,6 +33,11 @@ function NewPage() {
     },
     onSuccess: (d) => {
       toast.success("Beneficiário cadastrado");
+      awardSave({
+        fieldsFilled: formRef.current?.filledFields() ?? 0,
+        totalFields: formRef.current?.totalFields ?? 0,
+        startedAt: formRef.current?.startedAt ?? null,
+      });
       navigate({ to: "/beneficiarios/$id", params: { id: d.id } });
     },
     onError: (e: any) => toast.error(e.message),
