@@ -4,12 +4,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, RotateCcw, Sparkles, Search } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Check, RotateCcw, Sparkles, Search, Zap } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 
 export type Beneficiario = Record<string, any>;
+export type FormHandle = { startedAt: number | null; totalFields: number; filledFields: () => number };
 
 type Field = { name: string; label: string; type?: "text" | "date" | "number" | "textarea" | "bool"; full?: boolean; suggest?: boolean };
 
