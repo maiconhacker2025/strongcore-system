@@ -167,6 +167,24 @@ function RelatoriosPage() {
                     </SheetTrigger>
                     <FiltersSheet filters={filters} setFilters={setFilters} onClose={() => setFiltersOpen(false)} />
                   </Sheet>
+                  <Sheet open={columnsOpen} onOpenChange={setColumnsOpen}>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" className="gap-2">
+                        <Columns3 className="size-4" /> Colunas
+                        {customCols && customCols.length > 0 && (
+                          <Badge className="ml-1 h-5 min-w-5 px-1.5 bg-primary text-primary-foreground">
+                            {customCols.length}
+                          </Badge>
+                        )}
+                      </Button>
+                    </SheetTrigger>
+                    <ColumnsSheet
+                      value={customCols ?? selected.columns}
+                      onChange={setCustomCols}
+                      onClose={() => setColumnsOpen(false)}
+                      isCustom={!!customCols}
+                    />
+                  </Sheet>
                   <Button
                     onClick={() => generate()}
                     disabled={gen.isPending}
