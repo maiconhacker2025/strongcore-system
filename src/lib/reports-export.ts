@@ -18,17 +18,16 @@ export type FullReport = {
   groupBy?: { key: string; label: string; count: number }[]; // optional breakdown table
 };
 
+import { COLUMN_LABELS } from "./report-columns";
+
 const LABELS: Record<string, string> = {
-  codigo: "Código", nome: "Nome", data_nascimento: "Nascimento", idade: "Idade",
-  genero: "Gênero", classe_risco: "Risco", ativo: "Status",
-  escolaridade: "Escolaridade", turno: "Turno", escola: "Escola",
-  bairro: "Bairro", rua: "Rua", cep: "CEP", estado: "UF",
-  responsavel: "Responsável", nome_mae: "Mãe", nome_pai: "Pai",
-  mora_com: "Mora com", celular: "Celular", whatsapp: "WhatsApp", email: "E-mail",
-  data_ingresso_01: "Ingresso", data_desligamento_01: "Desligamento",
-  renda: "Renda", alergia: "Alergia", medicacao: "Medicação",
-  numero_irmaos: "Nº irmãos", assistente_social: "Assist. Social",
-  psicologa: "Psicóloga", observacoes: "Observações",
+  ...COLUMN_LABELS,
+  classe_risco: "Risco",
+  ativo: "Status",
+  nome_mae: "Mãe",
+  nome_pai: "Pai",
+  data_ingresso_01: "Ingresso",
+  data_desligamento_01: "Desligamento",
 };
 const labelOf = (c: string) =>
   LABELS[c] ?? c.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
