@@ -195,6 +195,7 @@ export function BeneficiarioForm({
   const [stats, setStats] = useState<OrderStats>(() => loadOrder());
   const sessionSeq = useRef<string[]>([]);
   const [suggestions, setSuggestions] = useState<Record<string, string[]>>({});
+  const [fieldQuery, setFieldQuery] = useState("");
 
   useEffect(() => {
     let cancel = false;
