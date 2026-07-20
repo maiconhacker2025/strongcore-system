@@ -139,7 +139,7 @@ function EditPage() {
         </div>
       </header>
 
-      <BeneficiarioForm value={form} onChange={setForm} />
+      <BeneficiarioForm ref={formRef} value={form} onChange={setForm} />
 
       <div className="mt-6 flex justify-end">
         <Button onClick={() => saveMut.mutate(form)} disabled={saveMut.isPending} size="lg">
