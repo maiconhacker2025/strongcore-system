@@ -59,7 +59,7 @@ function NewPage() {
         </Button>
       </header>
 
-      <BeneficiarioForm value={form} onChange={setForm} />
+      <BeneficiarioForm ref={formRef} value={form} onChange={setForm} />
 
       <div className="mt-6 flex justify-end">
         <Button onClick={() => mut.mutate(form)} disabled={mut.isPending} size="lg">
