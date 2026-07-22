@@ -58,9 +58,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <aside className="hidden md:flex w-72 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border shrink-0">
         {/* Brand */}
         <div className="px-6 pt-7 pb-6">
-          <div className="flex items-center gap-3">
-            <div className="size-11 rounded-xl bg-amber-500 shadow-lg shadow-amber-900/30 ring-1 ring-amber-400/40 p-1.5 flex items-center justify-center overflow-hidden">
-              <img src={logo} alt="Espaço Progredir" className="size-full object-contain" />
+          <div className="flex items-center gap-3.5 group cursor-default">
+            <div className="relative shrink-0">
+              <div className="absolute -inset-2 rounded-full bg-gradient-to-tr from-amber-400/50 via-teal-300/25 to-transparent blur-xl opacity-70 group-hover:opacity-100 transition-opacity animate-logo-glow" />
+              <div className="absolute -inset-0.5 rounded-full bg-[conic-gradient(from_0deg,theme(colors.amber.400),theme(colors.teal.300),theme(colors.amber.400))] opacity-80 animate-logo-spin" />
+              <div className="relative size-12 rounded-full bg-white p-[3px] shadow-xl shadow-black/40 overflow-hidden animate-logo-float">
+                <img src={logo} alt="Espaço Progredir" className="size-full object-cover rounded-full transition-transform duration-500 group-hover:scale-110" />
+              </div>
             </div>
             <div className="leading-tight">
               <p className="font-display font-bold text-white text-[17px] tracking-tight">Espaço Progredir</p>
