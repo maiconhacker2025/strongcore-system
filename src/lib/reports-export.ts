@@ -106,91 +106,150 @@ async function getLogoDataUrl(): Promise<string | null> {
 /* ============ PDF ============ */
 export async function exportReportPdf(r: FullReport) {
   try {
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const landscape = r.columns.length > 8;
+    const doc = new jsPDF({ unit: "pt", format: "a4", orientation: landscape ? "landscape" : "portrait" });
     const W = doc.internal.pageSize.getWidth();
+    const H = doc.internal.pageSize.getHeight();
     const rows = enrich(r.rows, r.columns);
+    const logoImg = await getLogoDataUrl();
 
-    // Header band
-    doc.setFillColor(30, 58, 138);
-    doc.rect(0, 0, W, 70, "F");
+    // ---------- HEADER BAND ----------
+    doc.setFillColor(...BRAND_TEAL);
+    doc.rect(0, 0, W, 96, "F");
+    // amber accent stripe
+    doc.setFillColor(...BRAND_AMBER);
+    doc.rect(0, 96, W, 4, "F");
+
+    // Logo circle (white ring) on the left
+    if (logoImg) {
+      const cx = 62, cy = 48, rad = 30;
+      doc.setFillColor(255, 255, 255);
+      doc.circle(cx, cy, rad + 3, "F");
+      // clip via image inside circle (approx — jsPDF has no true clip, use rounded rect fallback)
+      doc.addImage(logoImg, "JPEG", cx - rad, cy - rad, rad * 2, rad * 2, undefined, "FAST");
+    }
+
+    const brandX = logoImg ? 108 : 40;
     doc.setTextColor(255);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(16);
-    doc.text("Espaço Progredir · Relatório", 40, 32);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(10);
-    doc.text(`Emitido em ${today()}`, 40, 50);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(15);
+    doc.text("Espaço Progredir", brandX, 40);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+    doc.setTextColor(210, 235, 230);
+    doc.text("Acreditando na vida  ·  Programa de assistência social", brandX, 56);
+    doc.setFontSize(8.5);
+    doc.text(`Documento emitido em ${nowStamp()}`, brandX, 72);
 
-    // Title
-    doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(18);
-    doc.text(r.title, 40, 100);
+    // Right side chip
+    const chipLabel = "RELATÓRIO INSTITUCIONAL";
+    doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+    const chipW = doc.getTextWidth(chipLabel) + 20;
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(255, 255, 255);
+    doc.roundedRect(W - chipW - 40, 34, chipW, 20, 10, 10, "F");
+    doc.setTextColor(...BRAND_TEAL);
+    doc.text(chipLabel, W - chipW - 30, 47);
+
+    // ---------- TITLE BLOCK ----------
+    let y = 130;
+    doc.setTextColor(...INK); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
+    doc.text(r.title, 40, y); y += 8;
     if (r.subtitle) {
-      doc.setFont("helvetica", "normal"); doc.setFontSize(10);
-      doc.setTextColor(110);
-      doc.text(r.subtitle, 40, 116);
+      y += 12;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(10.5);
+      doc.setTextColor(...MUTED);
+      doc.text(r.subtitle, 40, y);
     }
+    y += 20;
 
-    let y = 135;
+    // Filters as pills
     if (r.filters?.length) {
-      doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(20);
-      doc.text("Filtros aplicados:", 40, y); y += 14;
-      doc.setFont("helvetica", "normal"); doc.setTextColor(70);
-      r.filters.forEach((f) => { doc.text(`• ${f}`, 50, y); y += 13; });
-      y += 6;
-    }
-
-    // KPIs cards
-    if (r.kpis?.length) {
-      const cardW = (W - 80 - (r.kpis.length - 1) * 10) / r.kpis.length;
-      r.kpis.forEach((k, i) => {
-        const x = 40 + i * (cardW + 10);
-        doc.setFillColor(243, 244, 246);
-        doc.roundedRect(x, y, cardW, 54, 6, 6, "F");
-        doc.setTextColor(90); doc.setFont("helvetica", "normal"); doc.setFontSize(9);
-        doc.text(k.label.toUpperCase(), x + 10, y + 18);
-        doc.setTextColor(30, 58, 138); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
-        doc.text(String(k.value), x + 10, y + 42);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(...BRAND_TEAL);
+      doc.text("FILTROS APLICADOS", 40, y); y += 10;
+      let px = 40;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8.5);
+      r.filters.forEach((f) => {
+        const w = doc.getTextWidth(f) + 16;
+        if (px + w > W - 40) { px = 40; y += 20; }
+        doc.setFillColor(...BRAND_TEAL_SOFT);
+        doc.setDrawColor(...BRAND_TEAL_SOFT);
+        doc.roundedRect(px, y - 9, w, 16, 8, 8, "F");
+        doc.setTextColor(...BRAND_TEAL);
+        doc.text(f, px + 8, y + 2);
+        px += w + 6;
       });
-      y += 70;
+      y += 20;
     }
 
+    // ---------- KPI CARDS ----------
+    if (r.kpis?.length) {
+      const gap = 10;
+      const cardW = (W - 80 - (r.kpis.length - 1) * gap) / r.kpis.length;
+      const cardH = 62;
+      r.kpis.forEach((k, i) => {
+        const x = 40 + i * (cardW + gap);
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(220, 226, 224);
+        doc.roundedRect(x, y, cardW, cardH, 8, 8, "FD");
+        // little amber accent bar
+        doc.setFillColor(...BRAND_AMBER);
+        doc.roundedRect(x, y, 4, cardH, 2, 2, "F");
+        doc.setTextColor(...MUTED); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+        doc.text(k.label.toUpperCase(), x + 14, y + 18);
+        doc.setTextColor(...BRAND_TEAL); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
+        doc.text(String(k.value), x + 14, y + 46);
+      });
+      y += cardH + 16;
+    }
+
+    // ---------- DISTRIBUTION TABLE ----------
     if (r.groupBy?.length) {
+      const total = r.groupBy.reduce((s, g) => s + g.count, 0) || 1;
+      doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(...INK);
+      doc.text("Distribuição", 40, y); y += 6;
       autoTable(doc, {
-        startY: y,
+        startY: y + 6,
         head: [["Categoria", "Quantidade", "%"]],
-        body: (() => {
-          const total = r.groupBy!.reduce((s, g) => s + g.count, 0) || 1;
-          return r.groupBy!.map((g) => [g.label, g.count, `${((g.count / total) * 100).toFixed(1)}%`]);
-        })(),
-        styles: { fontSize: 9, cellPadding: 5 },
-        headStyles: { fillColor: [30, 58, 138], textColor: 255 },
-        alternateRowStyles: { fillColor: [248, 250, 252] },
+        body: r.groupBy.map((g) => [g.label, g.count, `${((g.count / total) * 100).toFixed(1)}%`]),
+        styles: { fontSize: 9, cellPadding: 6, textColor: INK as any },
+        headStyles: { fillColor: BRAND_TEAL as any, textColor: 255, fontStyle: "bold" },
+        alternateRowStyles: { fillColor: ZEBRA as any },
         margin: { left: 40, right: 40 },
       });
-      y = (doc as any).lastAutoTable.finalY + 16;
+      y = (doc as any).lastAutoTable.finalY + 20;
     }
 
+    // ---------- DETAIL TABLE ----------
     if (rows.length) {
+      doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(...INK);
+      doc.text(`Detalhamento (${rows.length} beneficiário${rows.length > 1 ? "s" : ""})`, 40, y);
       autoTable(doc, {
-        startY: y,
-        head: [r.columns.map(labelOf)],
-        body: rows.map((row) => r.columns.map((c) => fmt(c, row[c]))),
-        styles: { fontSize: 7.5, cellPadding: 3, overflow: "linebreak" },
-        headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: "bold" },
-        alternateRowStyles: { fillColor: [248, 250, 252] },
-        margin: { left: 20, right: 20 },
+        startY: y + 8,
+        head: [["#", ...r.columns.map(labelOf)]],
+        body: rows.map((row, i) => [i + 1, ...r.columns.map((c) => fmt(c, row[c]))]),
+        styles: { fontSize: 7.5, cellPadding: 4, overflow: "linebreak", textColor: INK as any, lineColor: [230, 234, 232] as any, lineWidth: 0.3 },
+        headStyles: { fillColor: BRAND_TEAL as any, textColor: 255, fontStyle: "bold", halign: "left" },
+        alternateRowStyles: { fillColor: ZEBRA as any },
+        columnStyles: { 0: { cellWidth: 22, halign: "right", textColor: MUTED as any } },
+        margin: { left: 24, right: 24, top: 40 },
         didDrawPage: () => {
           const pg = doc.getNumberOfPages();
-          doc.setFontSize(8); doc.setTextColor(140);
-          doc.text(`Espaço Progredir · ${r.title} · página ${pg}`, 40, doc.internal.pageSize.getHeight() - 20);
+          // footer
+          doc.setDrawColor(...BRAND_TEAL_SOFT);
+          doc.line(24, H - 30, W - 24, H - 30);
+          doc.setFontSize(8); doc.setTextColor(...MUTED);
+          doc.text("Espaço Progredir · Acreditando na vida", 24, H - 16);
+          doc.text(`${r.title}  ·  página ${pg}`, W - 24, H - 16, { align: "right" });
         },
       });
     }
 
-    downloadBlob(doc.output("blob"), `${slug(r.title)}.pdf`);
-    toast.success("PDF gerado");
+    downloadBlob(doc.output("blob"), `${slug(r.title)}-${new Date().toISOString().slice(0,10)}.pdf`);
+    toast.success("PDF gerado com sucesso");
   } catch (e: any) {
     console.error(e); toast.error(`Erro ao gerar PDF: ${e?.message ?? e}`);
   }
 }
+
 
 /* ============ Excel ============ */
 export async function exportReportXlsx(r: FullReport) {
