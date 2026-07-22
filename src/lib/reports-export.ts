@@ -6,16 +6,17 @@ import {
   WidthType, BorderStyle, AlignmentType,
 } from "docx";
 import { toast } from "sonner";
+import logoUrl from "@/assets/logo-progredir.jpg";
 
 export type ReportKPI = { label: string; value: string | number };
 export type FullReport = {
   title: string;
   subtitle?: string;
-  filters?: string[];         // ex: ["Status: Ativos", "Ano ingresso: 2024"]
+  filters?: string[];
   kpis?: ReportKPI[];
-  columns: string[];          // column keys
+  columns: string[];
   rows: any[];
-  groupBy?: { key: string; label: string; count: number }[]; // optional breakdown table
+  groupBy?: { key: string; label: string; count: number }[];
 };
 
 import { COLUMN_LABELS } from "./report-columns";
@@ -31,6 +32,14 @@ const LABELS: Record<string, string> = {
 };
 const labelOf = (c: string) =>
   LABELS[c] ?? c.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+
+// Brand palette (matches sidebar teal + amber accents)
+const BRAND_TEAL: [number, number, number] = [6, 59, 56];
+const BRAND_TEAL_SOFT: [number, number, number] = [232, 244, 242];
+const BRAND_AMBER: [number, number, number] = [217, 145, 36];
+const INK: [number, number, number] = [24, 33, 33];
+const MUTED: [number, number, number] = [115, 125, 125];
+const ZEBRA: [number, number, number] = [248, 250, 249];
 
 function calcAge(dob: any): string {
   if (!dob) return "";
@@ -60,6 +69,7 @@ function enrich(rows: any[], columns: string[]) {
 }
 
 const today = () => new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+const nowStamp = () => new Date().toLocaleString("pt-BR");
 
 function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
@@ -73,6 +83,25 @@ function slug(s: string) {
   return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 60) || "relatorio";
 }
+
+let _logoData: string | null = null;
+async function getLogoDataUrl(): Promise<string | null> {
+  if (_logoData) return _logoData;
+  try {
+    const res = await fetch(logoUrl);
+    const blob = await res.blob();
+    _logoData = await new Promise<string>((r, j) => {
+      const fr = new FileReader();
+      fr.onload = () => r(fr.result as string);
+      fr.onerror = () => j(fr.error);
+      fr.readAsDataURL(blob);
+    });
+    return _logoData;
+  } catch {
+    return null;
+  }
+}
+
 
 /* ============ PDF ============ */
 export async function exportReportPdf(r: FullReport) {
