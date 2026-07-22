@@ -149,3 +149,28 @@
   }
   h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
 }
+
+@keyframes logo-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-3px) rotate(-2deg); }
+}
+@keyframes logo-glow {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.18); }
+}
+@keyframes logo-spin {
+  to { transform: rotate(360deg); }
+}
+.animate-logo-float { animation: logo-float 5.5s ease-in-out infinite; }
+.animate-logo-glow  { animation: logo-glow 4s ease-in-out infinite; }
+.animate-logo-spin  { animation: logo-spin 9s linear infinite; }
+
+@keyframes shimmer-x {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-shimmer-x {
+  background-size: 200% 100%;
+  animation: shimmer-x 3s linear infinite;
+}
+

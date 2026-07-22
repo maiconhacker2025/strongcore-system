@@ -28,13 +28,15 @@ export type ReportTemplate = {
   build: (filters: ReportFilters) => Promise<FullReport>;
 };
 
-const COLS_BASIC = ["codigo", "nome", "data_nascimento", "idade", "genero", "classe_risco", "ativo"];
-const COLS_ESCOLAR = ["nome", "idade", "escolaridade", "turno", "escola", "bairro", "responsavel", "celular"];
-const COLS_CONTATO = ["nome", "idade", "responsavel", "celular", "whatsapp", "email", "bairro"];
-const COLS_SAUDE = ["nome", "idade", "alergia", "medicacao", "observacoes", "responsavel", "celular"];
+const COLS_BASIC = ["codigo", "nome", "cpf", "rg", "data_nascimento", "idade", "genero", "classe_risco", "ativo"];
+const COLS_ESCOLAR = ["nome", "cpf", "idade", "escolaridade", "turno", "escola", "ano_anterior", "bairro", "responsavel", "celular", "whatsapp"];
+const COLS_CONTATO = ["nome", "idade", "responsavel", "tel_responsavel", "celular", "whatsapp", "residencial", "email", "tel_emergencia_01", "tel_emergencia_02", "rua", "bairro", "cep"];
+const COLS_SAUDE = ["nome", "idade", "alergia", "medicacao", "nome_medico", "tel_medico", "observacoes", "responsavel", "celular", "whatsapp"];
 const COLS_FULL = [
-  "codigo", "nome", "data_nascimento", "idade", "genero", "classe_risco", "ativo",
-  "escolaridade", "turno", "escola", "bairro", "responsavel", "celular", "whatsapp",
+  "codigo", "nome", "cpf", "rg", "data_nascimento", "idade", "genero", "classe_risco", "ativo",
+  "escolaridade", "turno", "escola", "bairro", "rua", "cep",
+  "responsavel", "tel_responsavel", "celular", "whatsapp", "email",
+  "nome_mae", "nome_pai", "alergia", "medicacao",
 ];
 
 async function fetchAll(): Promise<any[]> {
