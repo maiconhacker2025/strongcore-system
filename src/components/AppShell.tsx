@@ -23,6 +23,16 @@ const navGroups = [
     ],
   },
   {
+    label: "Atividades",
+    items: [
+      { to: "/atividades", label: "Painel de Atividades", icon: Sparkles, exact: true },
+      { to: "/atividades/oficinas", label: "Oficinas", icon: Award },
+      { to: "/atividades/turmas", label: "Turmas & Matrículas", icon: Users },
+      { to: "/atividades/frequencia", label: "Frequência", icon: UserCheck },
+      { to: "/atividades/calendario", label: "Calendário", icon: FileBarChart2 },
+    ],
+  },
+  {
     label: "Operacional",
     items: [
       { to: "/beneficiarios/novo", label: "Cadastrar", icon: UserPlus },
@@ -33,6 +43,7 @@ const navGroups = [
     ],
   },
 ] as const;
+
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
