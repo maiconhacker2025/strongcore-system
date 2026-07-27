@@ -18,9 +18,20 @@ function useAlerts() {
   return useQuery({
     queryKey: ["alertas"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("beneficiarios").select("*").limit(2000);
-      if (error) throw error;
-      const rows = (data ?? []) as B[];
+      const rows: B[] = [];
+      const size = 1000;
+      for (let from = 0; ; from += size) {
+        const { data, error } = await supabase
+          .from("beneficiarios")
+          .select("*")
+          .order("id", { ascending: true })
+          .range(from, from + size - 1);
+        if (error) throw error;
+        if (!data?.length) break;
+        rows.push(...(data as B[]));
+        if (data.length < size) break;
+      }
+
       const today = startOfDay(new Date());
       const in7 = addDays(today, 7);
 
