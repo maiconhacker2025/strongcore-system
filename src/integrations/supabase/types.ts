@@ -14,6 +14,193 @@ export type Database = {
   }
   public: {
     Tables: {
+      atividade_historico: {
+        Row: {
+          acao: string
+          autor: string | null
+          beneficiario_id: string | null
+          created_at: string
+          descricao: string
+          detalhes: Json | null
+          entidade: string
+          entidade_id: string | null
+          id: string
+        }
+        Insert: {
+          acao: string
+          autor?: string | null
+          beneficiario_id?: string | null
+          created_at?: string
+          descricao: string
+          detalhes?: Json | null
+          entidade: string
+          entidade_id?: string | null
+          id?: string
+        }
+        Update: {
+          acao?: string
+          autor?: string | null
+          beneficiario_id?: string | null
+          created_at?: string
+          descricao?: string
+          detalhes?: Json | null
+          entidade?: string
+          entidade_id?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atividade_historico_beneficiario_id_fkey"
+            columns: ["beneficiario_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aulas: {
+        Row: {
+          assinatura: string | null
+          conteudo: string | null
+          created_at: string
+          data: string
+          educador: string | null
+          fotos: string[]
+          horario_fim: string | null
+          horario_inicio: string | null
+          id: string
+          observacoes: string | null
+          turma_id: string
+          updated_at: string
+        }
+        Insert: {
+          assinatura?: string | null
+          conteudo?: string | null
+          created_at?: string
+          data?: string
+          educador?: string | null
+          fotos?: string[]
+          horario_fim?: string | null
+          horario_inicio?: string | null
+          id?: string
+          observacoes?: string | null
+          turma_id: string
+          updated_at?: string
+        }
+        Update: {
+          assinatura?: string | null
+          conteudo?: string | null
+          created_at?: string
+          data?: string
+          educador?: string | null
+          fotos?: string[]
+          horario_fim?: string | null
+          horario_inicio?: string | null
+          id?: string
+          observacoes?: string | null
+          turma_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aulas_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      avaliacoes: {
+        Row: {
+          beneficiario_id: string
+          comportamento: number | null
+          comprometimento: number | null
+          comunicacao: number | null
+          coordenacao_motora: number | null
+          created_at: string
+          criatividade: number | null
+          data: string
+          desenvolvimento: number | null
+          disciplina: number | null
+          educador: string | null
+          id: string
+          interacao: number | null
+          observacoes: string | null
+          participacao: number | null
+          plano_evolucao: string | null
+          pontualidade: number | null
+          proxima_avaliacao: string | null
+          socializacao: number | null
+          trabalho_equipe: number | null
+          turma_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          beneficiario_id: string
+          comportamento?: number | null
+          comprometimento?: number | null
+          comunicacao?: number | null
+          coordenacao_motora?: number | null
+          created_at?: string
+          criatividade?: number | null
+          data?: string
+          desenvolvimento?: number | null
+          disciplina?: number | null
+          educador?: string | null
+          id?: string
+          interacao?: number | null
+          observacoes?: string | null
+          participacao?: number | null
+          plano_evolucao?: string | null
+          pontualidade?: number | null
+          proxima_avaliacao?: string | null
+          socializacao?: number | null
+          trabalho_equipe?: number | null
+          turma_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          beneficiario_id?: string
+          comportamento?: number | null
+          comprometimento?: number | null
+          comunicacao?: number | null
+          coordenacao_motora?: number | null
+          created_at?: string
+          criatividade?: number | null
+          data?: string
+          desenvolvimento?: number | null
+          disciplina?: number | null
+          educador?: string | null
+          id?: string
+          interacao?: number | null
+          observacoes?: string | null
+          participacao?: number | null
+          plano_evolucao?: string | null
+          pontualidade?: number | null
+          proxima_avaliacao?: string | null
+          socializacao?: number | null
+          trabalho_equipe?: number | null
+          turma_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avaliacoes_beneficiario_id_fkey"
+            columns: ["beneficiario_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avaliacoes_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       beneficiario_arquivos: {
         Row: {
           beneficiario_id: string
@@ -390,6 +577,445 @@ export type Database = {
         }
         Relationships: []
       }
+      certificados: {
+        Row: {
+          assinante: string | null
+          beneficiario_id: string
+          carga_horaria: number | null
+          codigo: string
+          created_at: string
+          emitido_em: string
+          id: string
+          oficina_id: string | null
+          periodo_fim: string | null
+          periodo_inicio: string | null
+          titulo: string
+          turma_id: string | null
+        }
+        Insert: {
+          assinante?: string | null
+          beneficiario_id: string
+          carga_horaria?: number | null
+          codigo?: string
+          created_at?: string
+          emitido_em?: string
+          id?: string
+          oficina_id?: string | null
+          periodo_fim?: string | null
+          periodo_inicio?: string | null
+          titulo: string
+          turma_id?: string | null
+        }
+        Update: {
+          assinante?: string | null
+          beneficiario_id?: string
+          carga_horaria?: number | null
+          codigo?: string
+          created_at?: string
+          emitido_em?: string
+          id?: string
+          oficina_id?: string | null
+          periodo_fim?: string | null
+          periodo_inicio?: string | null
+          titulo?: string
+          turma_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificados_beneficiario_id_fkey"
+            columns: ["beneficiario_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificados_oficina_id_fkey"
+            columns: ["oficina_id"]
+            isOneToOne: false
+            referencedRelation: "oficinas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificados_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evento_participantes: {
+        Row: {
+          beneficiario_id: string
+          created_at: string
+          evento_id: string
+          id: string
+          observacoes: string | null
+          presente: boolean
+        }
+        Insert: {
+          beneficiario_id: string
+          created_at?: string
+          evento_id: string
+          id?: string
+          observacoes?: string | null
+          presente?: boolean
+        }
+        Update: {
+          beneficiario_id?: string
+          created_at?: string
+          evento_id?: string
+          id?: string
+          observacoes?: string | null
+          presente?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evento_participantes_beneficiario_id_fkey"
+            columns: ["beneficiario_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_participantes_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      eventos: {
+        Row: {
+          cor: string
+          created_at: string
+          data: string
+          data_fim: string | null
+          descricao: string | null
+          fotos: string[]
+          horario: string | null
+          id: string
+          local: string | null
+          nome: string
+          relatorio: string | null
+          responsavel: string | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          cor?: string
+          created_at?: string
+          data?: string
+          data_fim?: string | null
+          descricao?: string | null
+          fotos?: string[]
+          horario?: string | null
+          id?: string
+          local?: string | null
+          nome: string
+          relatorio?: string | null
+          responsavel?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Update: {
+          cor?: string
+          created_at?: string
+          data?: string
+          data_fim?: string | null
+          descricao?: string | null
+          fotos?: string[]
+          horario?: string | null
+          id?: string
+          local?: string | null
+          nome?: string
+          relatorio?: string | null
+          responsavel?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      frequencias: {
+        Row: {
+          aula_id: string
+          beneficiario_id: string
+          created_at: string
+          id: string
+          observacoes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          aula_id: string
+          beneficiario_id: string
+          created_at?: string
+          id?: string
+          observacoes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          aula_id?: string
+          beneficiario_id?: string
+          created_at?: string
+          id?: string
+          observacoes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "frequencias_aula_id_fkey"
+            columns: ["aula_id"]
+            isOneToOne: false
+            referencedRelation: "aulas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "frequencias_beneficiario_id_fkey"
+            columns: ["beneficiario_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matriculas: {
+        Row: {
+          autorizacao_assinada: boolean
+          beneficiario_id: string
+          created_at: string
+          data_matricula: string
+          data_saida: string | null
+          id: string
+          lista_espera: boolean
+          observacoes: string | null
+          status: string
+          turma_id: string
+          updated_at: string
+        }
+        Insert: {
+          autorizacao_assinada?: boolean
+          beneficiario_id: string
+          created_at?: string
+          data_matricula?: string
+          data_saida?: string | null
+          id?: string
+          lista_espera?: boolean
+          observacoes?: string | null
+          status?: string
+          turma_id: string
+          updated_at?: string
+        }
+        Update: {
+          autorizacao_assinada?: boolean
+          beneficiario_id?: string
+          created_at?: string
+          data_matricula?: string
+          data_saida?: string | null
+          id?: string
+          lista_espera?: boolean
+          observacoes?: string | null
+          status?: string
+          turma_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matriculas_beneficiario_id_fkey"
+            columns: ["beneficiario_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matriculas_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oficinas: {
+        Row: {
+          auxiliar: string | null
+          capacidade: number | null
+          carga_horaria: number | null
+          cor: string
+          created_at: string
+          descricao: string | null
+          dias_semana: string[]
+          educador: string | null
+          grupo: string
+          horario_fim: string | null
+          horario_inicio: string | null
+          icone: string | null
+          id: string
+          idade_max: number | null
+          idade_min: number | null
+          imagem_url: string | null
+          materiais: string | null
+          nome: string
+          numero_encontros: number | null
+          objetivos: string | null
+          observacoes: string | null
+          sala: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          auxiliar?: string | null
+          capacidade?: number | null
+          carga_horaria?: number | null
+          cor?: string
+          created_at?: string
+          descricao?: string | null
+          dias_semana?: string[]
+          educador?: string | null
+          grupo?: string
+          horario_fim?: string | null
+          horario_inicio?: string | null
+          icone?: string | null
+          id?: string
+          idade_max?: number | null
+          idade_min?: number | null
+          imagem_url?: string | null
+          materiais?: string | null
+          nome: string
+          numero_encontros?: number | null
+          objetivos?: string | null
+          observacoes?: string | null
+          sala?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          auxiliar?: string | null
+          capacidade?: number | null
+          carga_horaria?: number | null
+          cor?: string
+          created_at?: string
+          descricao?: string | null
+          dias_semana?: string[]
+          educador?: string | null
+          grupo?: string
+          horario_fim?: string | null
+          horario_inicio?: string | null
+          icone?: string | null
+          id?: string
+          idade_max?: number | null
+          idade_min?: number | null
+          imagem_url?: string | null
+          materiais?: string | null
+          nome?: string
+          numero_encontros?: number | null
+          objetivos?: string | null
+          observacoes?: string | null
+          sala?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      projeto_participantes: {
+        Row: {
+          beneficiario_id: string
+          created_at: string
+          id: string
+          observacoes: string | null
+          projeto_id: string
+        }
+        Insert: {
+          beneficiario_id: string
+          created_at?: string
+          id?: string
+          observacoes?: string | null
+          projeto_id: string
+        }
+        Update: {
+          beneficiario_id?: string
+          created_at?: string
+          id?: string
+          observacoes?: string | null
+          projeto_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projeto_participantes_beneficiario_id_fkey"
+            columns: ["beneficiario_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projeto_participantes_projeto_id_fkey"
+            columns: ["projeto_id"]
+            isOneToOne: false
+            referencedRelation: "projetos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projetos: {
+        Row: {
+          coordenador: string | null
+          cor: string
+          created_at: string
+          cronograma: string | null
+          data_fim: string | null
+          data_inicio: string | null
+          descricao: string | null
+          equipe: string | null
+          id: string
+          indicadores: string | null
+          metas: string | null
+          nome: string
+          objetivos: string | null
+          resultados: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          coordenador?: string | null
+          cor?: string
+          created_at?: string
+          cronograma?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          descricao?: string | null
+          equipe?: string | null
+          id?: string
+          indicadores?: string | null
+          metas?: string | null
+          nome: string
+          objetivos?: string | null
+          resultados?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          coordenador?: string | null
+          cor?: string
+          created_at?: string
+          cronograma?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          descricao?: string | null
+          equipe?: string | null
+          id?: string
+          indicadores?: string | null
+          metas?: string | null
+          nome?: string
+          objetivos?: string | null
+          resultados?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       report_logs: {
         Row: {
           created_at: string
@@ -473,6 +1099,65 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      turmas: {
+        Row: {
+          auxiliar: string | null
+          created_at: string
+          dias_semana: string[]
+          horario_fim: string | null
+          horario_inicio: string | null
+          id: string
+          limite_alunos: number | null
+          nome: string
+          observacoes: string | null
+          oficina_id: string
+          professor: string | null
+          sala: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          auxiliar?: string | null
+          created_at?: string
+          dias_semana?: string[]
+          horario_fim?: string | null
+          horario_inicio?: string | null
+          id?: string
+          limite_alunos?: number | null
+          nome: string
+          observacoes?: string | null
+          oficina_id: string
+          professor?: string | null
+          sala?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          auxiliar?: string | null
+          created_at?: string
+          dias_semana?: string[]
+          horario_fim?: string | null
+          horario_inicio?: string | null
+          id?: string
+          limite_alunos?: number | null
+          nome?: string
+          observacoes?: string | null
+          oficina_id?: string
+          professor?: string | null
+          sala?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "turmas_oficina_id_fkey"
+            columns: ["oficina_id"]
+            isOneToOne: false
+            referencedRelation: "oficinas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
