@@ -18,6 +18,7 @@ import { Route as BeneficiariosIndexRouteImport } from './routes/beneficiarios.i
 import { Route as AtividadesIndexRouteImport } from './routes/atividades.index'
 import { Route as BeneficiariosNovoRouteImport } from './routes/beneficiarios.novo'
 import { Route as BeneficiariosIdRouteImport } from './routes/beneficiarios.$id'
+import { Route as AtividadesTurmasRouteImport } from './routes/atividades.turmas'
 import { Route as AtividadesOficinasRouteImport } from './routes/atividades.oficinas'
 
 const RelatoriosRoute = RelatoriosRouteImport.update({
@@ -65,6 +66,11 @@ const BeneficiariosIdRoute = BeneficiariosIdRouteImport.update({
   path: '/beneficiarios/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtividadesTurmasRoute = AtividadesTurmasRouteImport.update({
+  id: '/atividades/turmas',
+  path: '/atividades/turmas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AtividadesOficinasRoute = AtividadesOficinasRouteImport.update({
   id: '/atividades/oficinas',
   path: '/atividades/oficinas',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/importar': typeof ImportarRoute
   '/relatorios': typeof RelatoriosRoute
   '/atividades/oficinas': typeof AtividadesOficinasRoute
+  '/atividades/turmas': typeof AtividadesTurmasRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
   '/atividades/': typeof AtividadesIndexRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/importar': typeof ImportarRoute
   '/relatorios': typeof RelatoriosRoute
   '/atividades/oficinas': typeof AtividadesOficinasRoute
+  '/atividades/turmas': typeof AtividadesTurmasRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
   '/atividades': typeof AtividadesIndexRoute
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/importar': typeof ImportarRoute
   '/relatorios': typeof RelatoriosRoute
   '/atividades/oficinas': typeof AtividadesOficinasRoute
+  '/atividades/turmas': typeof AtividadesTurmasRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
   '/atividades/': typeof AtividadesIndexRoute
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/importar'
     | '/relatorios'
     | '/atividades/oficinas'
+    | '/atividades/turmas'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
     | '/atividades/'
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/importar'
     | '/relatorios'
     | '/atividades/oficinas'
+    | '/atividades/turmas'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
     | '/atividades'
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/importar'
     | '/relatorios'
     | '/atividades/oficinas'
+    | '/atividades/turmas'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
     | '/atividades/'
@@ -154,6 +166,7 @@ export interface RootRouteChildren {
   ImportarRoute: typeof ImportarRoute
   RelatoriosRoute: typeof RelatoriosRoute
   AtividadesOficinasRoute: typeof AtividadesOficinasRoute
+  AtividadesTurmasRoute: typeof AtividadesTurmasRoute
   BeneficiariosIdRoute: typeof BeneficiariosIdRoute
   BeneficiariosNovoRoute: typeof BeneficiariosNovoRoute
   AtividadesIndexRoute: typeof AtividadesIndexRoute
@@ -225,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BeneficiariosIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atividades/turmas': {
+      id: '/atividades/turmas'
+      path: '/atividades/turmas'
+      fullPath: '/atividades/turmas'
+      preLoaderRoute: typeof AtividadesTurmasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/atividades/oficinas': {
       id: '/atividades/oficinas'
       path: '/atividades/oficinas'
@@ -242,6 +262,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImportarRoute: ImportarRoute,
   RelatoriosRoute: RelatoriosRoute,
   AtividadesOficinasRoute: AtividadesOficinasRoute,
+  AtividadesTurmasRoute: AtividadesTurmasRoute,
   BeneficiariosIdRoute: BeneficiariosIdRoute,
   BeneficiariosNovoRoute: BeneficiariosNovoRoute,
   AtividadesIndexRoute: AtividadesIndexRoute,
