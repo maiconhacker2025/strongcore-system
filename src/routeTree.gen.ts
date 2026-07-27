@@ -19,9 +19,15 @@ import { Route as AtividadesIndexRouteImport } from './routes/atividades.index'
 import { Route as BeneficiariosNovoRouteImport } from './routes/beneficiarios.novo'
 import { Route as BeneficiariosIdRouteImport } from './routes/beneficiarios.$id'
 import { Route as AtividadesTurmasRouteImport } from './routes/atividades.turmas'
+import { Route as AtividadesProjetosRouteImport } from './routes/atividades.projetos'
 import { Route as AtividadesOficinasRouteImport } from './routes/atividades.oficinas'
+import { Route as AtividadesIndicadoresRouteImport } from './routes/atividades.indicadores'
+import { Route as AtividadesHistoricoRouteImport } from './routes/atividades.historico'
 import { Route as AtividadesFrequenciaRouteImport } from './routes/atividades.frequencia'
+import { Route as AtividadesEventosRouteImport } from './routes/atividades.eventos'
+import { Route as AtividadesCertificadosRouteImport } from './routes/atividades.certificados'
 import { Route as AtividadesCalendarioRouteImport } from './routes/atividades.calendario'
+import { Route as AtividadesAvaliacoesRouteImport } from './routes/atividades.avaliacoes'
 
 const RelatoriosRoute = RelatoriosRouteImport.update({
   id: '/relatorios',
@@ -73,9 +79,24 @@ const AtividadesTurmasRoute = AtividadesTurmasRouteImport.update({
   path: '/atividades/turmas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtividadesProjetosRoute = AtividadesProjetosRouteImport.update({
+  id: '/atividades/projetos',
+  path: '/atividades/projetos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AtividadesOficinasRoute = AtividadesOficinasRouteImport.update({
   id: '/atividades/oficinas',
   path: '/atividades/oficinas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtividadesIndicadoresRoute = AtividadesIndicadoresRouteImport.update({
+  id: '/atividades/indicadores',
+  path: '/atividades/indicadores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtividadesHistoricoRoute = AtividadesHistoricoRouteImport.update({
+  id: '/atividades/historico',
+  path: '/atividades/historico',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AtividadesFrequenciaRoute = AtividadesFrequenciaRouteImport.update({
@@ -83,9 +104,24 @@ const AtividadesFrequenciaRoute = AtividadesFrequenciaRouteImport.update({
   path: '/atividades/frequencia',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtividadesEventosRoute = AtividadesEventosRouteImport.update({
+  id: '/atividades/eventos',
+  path: '/atividades/eventos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtividadesCertificadosRoute = AtividadesCertificadosRouteImport.update({
+  id: '/atividades/certificados',
+  path: '/atividades/certificados',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AtividadesCalendarioRoute = AtividadesCalendarioRouteImport.update({
   id: '/atividades/calendario',
   path: '/atividades/calendario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtividadesAvaliacoesRoute = AtividadesAvaliacoesRouteImport.update({
+  id: '/atividades/avaliacoes',
+  path: '/atividades/avaliacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -95,9 +131,15 @@ export interface FileRoutesByFullPath {
   '/ia': typeof IaRoute
   '/importar': typeof ImportarRoute
   '/relatorios': typeof RelatoriosRoute
+  '/atividades/avaliacoes': typeof AtividadesAvaliacoesRoute
   '/atividades/calendario': typeof AtividadesCalendarioRoute
+  '/atividades/certificados': typeof AtividadesCertificadosRoute
+  '/atividades/eventos': typeof AtividadesEventosRoute
   '/atividades/frequencia': typeof AtividadesFrequenciaRoute
+  '/atividades/historico': typeof AtividadesHistoricoRoute
+  '/atividades/indicadores': typeof AtividadesIndicadoresRoute
   '/atividades/oficinas': typeof AtividadesOficinasRoute
+  '/atividades/projetos': typeof AtividadesProjetosRoute
   '/atividades/turmas': typeof AtividadesTurmasRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
@@ -110,9 +152,15 @@ export interface FileRoutesByTo {
   '/ia': typeof IaRoute
   '/importar': typeof ImportarRoute
   '/relatorios': typeof RelatoriosRoute
+  '/atividades/avaliacoes': typeof AtividadesAvaliacoesRoute
   '/atividades/calendario': typeof AtividadesCalendarioRoute
+  '/atividades/certificados': typeof AtividadesCertificadosRoute
+  '/atividades/eventos': typeof AtividadesEventosRoute
   '/atividades/frequencia': typeof AtividadesFrequenciaRoute
+  '/atividades/historico': typeof AtividadesHistoricoRoute
+  '/atividades/indicadores': typeof AtividadesIndicadoresRoute
   '/atividades/oficinas': typeof AtividadesOficinasRoute
+  '/atividades/projetos': typeof AtividadesProjetosRoute
   '/atividades/turmas': typeof AtividadesTurmasRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
@@ -126,9 +174,15 @@ export interface FileRoutesById {
   '/ia': typeof IaRoute
   '/importar': typeof ImportarRoute
   '/relatorios': typeof RelatoriosRoute
+  '/atividades/avaliacoes': typeof AtividadesAvaliacoesRoute
   '/atividades/calendario': typeof AtividadesCalendarioRoute
+  '/atividades/certificados': typeof AtividadesCertificadosRoute
+  '/atividades/eventos': typeof AtividadesEventosRoute
   '/atividades/frequencia': typeof AtividadesFrequenciaRoute
+  '/atividades/historico': typeof AtividadesHistoricoRoute
+  '/atividades/indicadores': typeof AtividadesIndicadoresRoute
   '/atividades/oficinas': typeof AtividadesOficinasRoute
+  '/atividades/projetos': typeof AtividadesProjetosRoute
   '/atividades/turmas': typeof AtividadesTurmasRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
@@ -143,9 +197,15 @@ export interface FileRouteTypes {
     | '/ia'
     | '/importar'
     | '/relatorios'
+    | '/atividades/avaliacoes'
     | '/atividades/calendario'
+    | '/atividades/certificados'
+    | '/atividades/eventos'
     | '/atividades/frequencia'
+    | '/atividades/historico'
+    | '/atividades/indicadores'
     | '/atividades/oficinas'
+    | '/atividades/projetos'
     | '/atividades/turmas'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
@@ -158,9 +218,15 @@ export interface FileRouteTypes {
     | '/ia'
     | '/importar'
     | '/relatorios'
+    | '/atividades/avaliacoes'
     | '/atividades/calendario'
+    | '/atividades/certificados'
+    | '/atividades/eventos'
     | '/atividades/frequencia'
+    | '/atividades/historico'
+    | '/atividades/indicadores'
     | '/atividades/oficinas'
+    | '/atividades/projetos'
     | '/atividades/turmas'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
@@ -173,9 +239,15 @@ export interface FileRouteTypes {
     | '/ia'
     | '/importar'
     | '/relatorios'
+    | '/atividades/avaliacoes'
     | '/atividades/calendario'
+    | '/atividades/certificados'
+    | '/atividades/eventos'
     | '/atividades/frequencia'
+    | '/atividades/historico'
+    | '/atividades/indicadores'
     | '/atividades/oficinas'
+    | '/atividades/projetos'
     | '/atividades/turmas'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
@@ -189,9 +261,15 @@ export interface RootRouteChildren {
   IaRoute: typeof IaRoute
   ImportarRoute: typeof ImportarRoute
   RelatoriosRoute: typeof RelatoriosRoute
+  AtividadesAvaliacoesRoute: typeof AtividadesAvaliacoesRoute
   AtividadesCalendarioRoute: typeof AtividadesCalendarioRoute
+  AtividadesCertificadosRoute: typeof AtividadesCertificadosRoute
+  AtividadesEventosRoute: typeof AtividadesEventosRoute
   AtividadesFrequenciaRoute: typeof AtividadesFrequenciaRoute
+  AtividadesHistoricoRoute: typeof AtividadesHistoricoRoute
+  AtividadesIndicadoresRoute: typeof AtividadesIndicadoresRoute
   AtividadesOficinasRoute: typeof AtividadesOficinasRoute
+  AtividadesProjetosRoute: typeof AtividadesProjetosRoute
   AtividadesTurmasRoute: typeof AtividadesTurmasRoute
   BeneficiariosIdRoute: typeof BeneficiariosIdRoute
   BeneficiariosNovoRoute: typeof BeneficiariosNovoRoute
@@ -271,11 +349,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtividadesTurmasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atividades/projetos': {
+      id: '/atividades/projetos'
+      path: '/atividades/projetos'
+      fullPath: '/atividades/projetos'
+      preLoaderRoute: typeof AtividadesProjetosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/atividades/oficinas': {
       id: '/atividades/oficinas'
       path: '/atividades/oficinas'
       fullPath: '/atividades/oficinas'
       preLoaderRoute: typeof AtividadesOficinasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atividades/indicadores': {
+      id: '/atividades/indicadores'
+      path: '/atividades/indicadores'
+      fullPath: '/atividades/indicadores'
+      preLoaderRoute: typeof AtividadesIndicadoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atividades/historico': {
+      id: '/atividades/historico'
+      path: '/atividades/historico'
+      fullPath: '/atividades/historico'
+      preLoaderRoute: typeof AtividadesHistoricoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/atividades/frequencia': {
@@ -285,11 +384,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtividadesFrequenciaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atividades/eventos': {
+      id: '/atividades/eventos'
+      path: '/atividades/eventos'
+      fullPath: '/atividades/eventos'
+      preLoaderRoute: typeof AtividadesEventosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atividades/certificados': {
+      id: '/atividades/certificados'
+      path: '/atividades/certificados'
+      fullPath: '/atividades/certificados'
+      preLoaderRoute: typeof AtividadesCertificadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/atividades/calendario': {
       id: '/atividades/calendario'
       path: '/atividades/calendario'
       fullPath: '/atividades/calendario'
       preLoaderRoute: typeof AtividadesCalendarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atividades/avaliacoes': {
+      id: '/atividades/avaliacoes'
+      path: '/atividades/avaliacoes'
+      fullPath: '/atividades/avaliacoes'
+      preLoaderRoute: typeof AtividadesAvaliacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -301,9 +421,15 @@ const rootRouteChildren: RootRouteChildren = {
   IaRoute: IaRoute,
   ImportarRoute: ImportarRoute,
   RelatoriosRoute: RelatoriosRoute,
+  AtividadesAvaliacoesRoute: AtividadesAvaliacoesRoute,
   AtividadesCalendarioRoute: AtividadesCalendarioRoute,
+  AtividadesCertificadosRoute: AtividadesCertificadosRoute,
+  AtividadesEventosRoute: AtividadesEventosRoute,
   AtividadesFrequenciaRoute: AtividadesFrequenciaRoute,
+  AtividadesHistoricoRoute: AtividadesHistoricoRoute,
+  AtividadesIndicadoresRoute: AtividadesIndicadoresRoute,
   AtividadesOficinasRoute: AtividadesOficinasRoute,
+  AtividadesProjetosRoute: AtividadesProjetosRoute,
   AtividadesTurmasRoute: AtividadesTurmasRoute,
   BeneficiariosIdRoute: BeneficiariosIdRoute,
   BeneficiariosNovoRoute: BeneficiariosNovoRoute,
