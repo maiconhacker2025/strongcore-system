@@ -33,17 +33,25 @@ function ListPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["beneficiarios", q, filter],
     queryFn: async () => {
-      let query = supabase
-        .from("beneficiarios")
-        .select("id, nome, codigo, bairro, escola, escolaridade, ativo, classe_risco, data_nascimento, celular, whatsapp, genero, turno, nome_mae, responsavel")
-        .order("nome", { ascending: true })
-        .limit(500);
-      if (q.trim()) query = query.ilike("nome", `%${q.trim()}%`);
-      if (filter === "ativos") query = query.eq("ativo", true);
-      if (filter === "inativos") query = query.eq("ativo", false);
-      const { data, error } = await query;
-      if (error) throw error;
-      return data ?? [];
+      const all: any[] = [];
+      const size = 1000;
+      for (let from = 0; ; from += size) {
+        let query = supabase
+          .from("beneficiarios")
+          .select("id, nome, codigo, bairro, escola, escolaridade, ativo, classe_risco, data_nascimento, celular, whatsapp, genero, turno, nome_mae, responsavel")
+          .order("nome", { ascending: true })
+          .range(from, from + size - 1);
+        if (q.trim()) query = query.ilike("nome", `%${q.trim()}%`);
+        if (filter === "ativos") query = query.eq("ativo", true);
+        if (filter === "inativos") query = query.eq("ativo", false);
+        const { data, error } = await query;
+        if (error) throw error;
+        if (!data?.length) break;
+        all.push(...data);
+        if (data.length < size) break;
+      }
+      return all;
+
     },
   });
 
