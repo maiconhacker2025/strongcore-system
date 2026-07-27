@@ -15,6 +15,7 @@ import { Route as IaRouteImport } from './routes/ia'
 import { Route as AlertasRouteImport } from './routes/alertas'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BeneficiariosIndexRouteImport } from './routes/beneficiarios.index'
+import { Route as AtividadesIndexRouteImport } from './routes/atividades.index'
 import { Route as BeneficiariosNovoRouteImport } from './routes/beneficiarios.novo'
 import { Route as BeneficiariosIdRouteImport } from './routes/beneficiarios.$id'
 
@@ -48,6 +49,11 @@ const BeneficiariosIndexRoute = BeneficiariosIndexRouteImport.update({
   path: '/beneficiarios/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtividadesIndexRoute = AtividadesIndexRouteImport.update({
+  id: '/atividades/',
+  path: '/atividades/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BeneficiariosNovoRoute = BeneficiariosNovoRouteImport.update({
   id: '/beneficiarios/novo',
   path: '/beneficiarios/novo',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/relatorios': typeof RelatoriosRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
+  '/atividades/': typeof AtividadesIndexRoute
   '/beneficiarios/': typeof BeneficiariosIndexRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/relatorios': typeof RelatoriosRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
+  '/atividades': typeof AtividadesIndexRoute
   '/beneficiarios': typeof BeneficiariosIndexRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/relatorios': typeof RelatoriosRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
+  '/atividades/': typeof AtividadesIndexRoute
   '/beneficiarios/': typeof BeneficiariosIndexRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
+    | '/atividades/'
     | '/beneficiarios/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
+    | '/atividades'
     | '/beneficiarios'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
+    | '/atividades/'
     | '/beneficiarios/'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   RelatoriosRoute: typeof RelatoriosRoute
   BeneficiariosIdRoute: typeof BeneficiariosIdRoute
   BeneficiariosNovoRoute: typeof BeneficiariosNovoRoute
+  AtividadesIndexRoute: typeof AtividadesIndexRoute
   BeneficiariosIndexRoute: typeof BeneficiariosIndexRoute
 }
 
@@ -178,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BeneficiariosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atividades/': {
+      id: '/atividades/'
+      path: '/atividades'
+      fullPath: '/atividades/'
+      preLoaderRoute: typeof AtividadesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/beneficiarios/novo': {
       id: '/beneficiarios/novo'
       path: '/beneficiarios/novo'
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   RelatoriosRoute: RelatoriosRoute,
   BeneficiariosIdRoute: BeneficiariosIdRoute,
   BeneficiariosNovoRoute: BeneficiariosNovoRoute,
+  AtividadesIndexRoute: AtividadesIndexRoute,
   BeneficiariosIndexRoute: BeneficiariosIndexRoute,
 }
 export const routeTree = rootRouteImport
