@@ -18,6 +18,7 @@ import { Route as BeneficiariosIndexRouteImport } from './routes/beneficiarios.i
 import { Route as AtividadesIndexRouteImport } from './routes/atividades.index'
 import { Route as BeneficiariosNovoRouteImport } from './routes/beneficiarios.novo'
 import { Route as BeneficiariosIdRouteImport } from './routes/beneficiarios.$id'
+import { Route as AtividadesOficinasRouteImport } from './routes/atividades.oficinas'
 
 const RelatoriosRoute = RelatoriosRouteImport.update({
   id: '/relatorios',
@@ -64,6 +65,11 @@ const BeneficiariosIdRoute = BeneficiariosIdRouteImport.update({
   path: '/beneficiarios/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtividadesOficinasRoute = AtividadesOficinasRouteImport.update({
+  id: '/atividades/oficinas',
+  path: '/atividades/oficinas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/ia': typeof IaRoute
   '/importar': typeof ImportarRoute
   '/relatorios': typeof RelatoriosRoute
+  '/atividades/oficinas': typeof AtividadesOficinasRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
   '/atividades/': typeof AtividadesIndexRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/ia': typeof IaRoute
   '/importar': typeof ImportarRoute
   '/relatorios': typeof RelatoriosRoute
+  '/atividades/oficinas': typeof AtividadesOficinasRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
   '/atividades': typeof AtividadesIndexRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/ia': typeof IaRoute
   '/importar': typeof ImportarRoute
   '/relatorios': typeof RelatoriosRoute
+  '/atividades/oficinas': typeof AtividadesOficinasRoute
   '/beneficiarios/$id': typeof BeneficiariosIdRoute
   '/beneficiarios/novo': typeof BeneficiariosNovoRoute
   '/atividades/': typeof AtividadesIndexRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/ia'
     | '/importar'
     | '/relatorios'
+    | '/atividades/oficinas'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
     | '/atividades/'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/ia'
     | '/importar'
     | '/relatorios'
+    | '/atividades/oficinas'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
     | '/atividades'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/ia'
     | '/importar'
     | '/relatorios'
+    | '/atividades/oficinas'
     | '/beneficiarios/$id'
     | '/beneficiarios/novo'
     | '/atividades/'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   IaRoute: typeof IaRoute
   ImportarRoute: typeof ImportarRoute
   RelatoriosRoute: typeof RelatoriosRoute
+  AtividadesOficinasRoute: typeof AtividadesOficinasRoute
   BeneficiariosIdRoute: typeof BeneficiariosIdRoute
   BeneficiariosNovoRoute: typeof BeneficiariosNovoRoute
   AtividadesIndexRoute: typeof AtividadesIndexRoute
@@ -212,6 +225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BeneficiariosIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atividades/oficinas': {
+      id: '/atividades/oficinas'
+      path: '/atividades/oficinas'
+      fullPath: '/atividades/oficinas'
+      preLoaderRoute: typeof AtividadesOficinasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   IaRoute: IaRoute,
   ImportarRoute: ImportarRoute,
   RelatoriosRoute: RelatoriosRoute,
+  AtividadesOficinasRoute: AtividadesOficinasRoute,
   BeneficiariosIdRoute: BeneficiariosIdRoute,
   BeneficiariosNovoRoute: BeneficiariosNovoRoute,
   AtividadesIndexRoute: AtividadesIndexRoute,
