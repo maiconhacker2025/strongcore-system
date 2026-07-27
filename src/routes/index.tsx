@@ -41,12 +41,23 @@ function Dashboard() {
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard-data"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("beneficiarios")
-        .select("id, nome, codigo, bairro, escola, escolaridade, ativo, classe_risco, genero, turno, data_nascimento, data_ingresso_01, data_desligamento_01, created_at, whatsapp, celular, alergia, medicacao, possui_beneficios, possui_dificuldades, renda")
-        .limit(5000);
-      if (error) throw error;
-      return data ?? [];
+      // Busca paginada: o backend limita cada resposta a 1000 linhas
+      const cols = "id, nome, codigo, bairro, escola, escolaridade, ativo, classe_risco, genero, turno, data_nascimento, data_ingresso_01, data_desligamento_01, created_at, whatsapp, celular, alergia, medicacao, possui_beneficios, possui_dificuldades, renda";
+      const all: any[] = [];
+      const size = 1000;
+      for (let from = 0; ; from += size) {
+        const { data, error } = await supabase
+          .from("beneficiarios")
+          .select(cols)
+          .order("id", { ascending: true })
+          .range(from, from + size - 1);
+        if (error) throw error;
+        if (!data?.length) break;
+        all.push(...data);
+        if (data.length < size) break;
+      }
+      return all;
+
     },
   });
 
