@@ -269,11 +269,13 @@ function RelatoriosPage() {
             </div>
           </aside>
 
-          <section className="min-w-0">
+          <section className="min-w-0 space-y-6">
+            <AtivosAnoCard />
             {gen.isPending && <PreviewSkeleton title={selected.name} />}
             {!gen.isPending && !report && <EmptyPreview onGenerate={() => generate()} template={selected} />}
             {report && <ReportPreview report={report} onRegenerate={() => generate()} />}
           </section>
+
         </div>
       )}
 
