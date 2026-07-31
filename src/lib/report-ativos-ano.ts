@@ -39,20 +39,31 @@ export function documentoDe(b: any): string {
   return "Documento não informado";
 }
 
-/** Beneficiário estava ATIVO durante o ano informado. */
+/**
+ * Beneficiário estava ATIVO durante o ano informado.
+ * Cada ingresso é pareado com o desligamento correspondente (01/02/03),
+ * formando períodos. O beneficiário conta no ano se algum período cobre o ano.
+ * - Período sem desligamento: aberto apenas se o cadastro está ativo;
+ *   caso contrário vale somente o ano do ingresso.
+ * - Sem nenhuma data de ingresso: só entra se o cadastro está ativo.
+ */
 export function ativoNoAno(b: any, ano: number): boolean {
-  const ingressos = [b.data_ingresso_01, b.data_ingresso_02, b.data_ingresso_03]
-    .map(yearOf).filter((y): y is number => y !== null);
-  const desligamentos = [b.data_desligamento_01, b.data_desligamento_02, b.data_desligamento_03]
-    .map(yearOf).filter((y): y is number => y !== null);
+  const pares: Array<[number | null, number | null]> = [
+    [yearOf(b.data_ingresso_01), yearOf(b.data_desligamento_01)],
+    [yearOf(b.data_ingresso_02), yearOf(b.data_desligamento_02)],
+    [yearOf(b.data_ingresso_03), yearOf(b.data_desligamento_03)],
+  ];
 
-  if (ingressos.length === 0) return !!b.ativo;
+  const periodos = pares.filter(([i]) => i !== null) as Array<[number, number | null]>;
+  if (periodos.length === 0) return !!b.ativo;
 
-  const entrou = Math.min(...ingressos) <= ano;
-  if (!entrou) return false;
-  if (desligamentos.length === 0) return true;
-  return Math.max(...desligamentos) >= ano;
+  return periodos.some(([ini, fim]) => {
+    if (ini > ano) return false;
+    const fimEfetivo = fim ?? (b.ativo ? Number.POSITIVE_INFINITY : ini);
+    return fimEfetivo >= ano;
+  });
 }
+
 
 /** Busca paginada — suporta milhares de registros. */
 export async function fetchAtivosAno(ano: number): Promise<AtivoAnoRow[]> {
