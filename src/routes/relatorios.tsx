@@ -45,6 +45,8 @@ import { COLUMN_GROUPS, COLUMN_PRESETS } from "@/lib/report-columns";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { AtivosAnoCard } from "@/components/AtivosAnoCard";
+
 
 
 export const Route = createFileRoute("/relatorios")({
@@ -269,11 +271,13 @@ function RelatoriosPage() {
             </div>
           </aside>
 
-          <section className="min-w-0">
+          <section className="min-w-0 space-y-6">
+            <AtivosAnoCard />
             {gen.isPending && <PreviewSkeleton title={selected.name} />}
             {!gen.isPending && !report && <EmptyPreview onGenerate={() => generate()} template={selected} />}
             {report && <ReportPreview report={report} onRegenerate={() => generate()} />}
           </section>
+
         </div>
       )}
 
