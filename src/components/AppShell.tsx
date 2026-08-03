@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Users, LayoutDashboard, UserPlus, Sparkles, Download,
-  UserCheck, UserMinus, FileBarChart2, Award, AlertTriangle, FileSpreadsheet,
+  UserCheck, UserMinus, FileBarChart2, Award, AlertTriangle, FileSpreadsheet, ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { QuickSearch } from "@/components/QuickSearch";
@@ -29,7 +29,9 @@ const navGroups = [
       { to: "/atividades/oficinas", label: "Oficinas", icon: Award },
       { to: "/atividades/turmas", label: "Turmas & Matrículas", icon: Users },
       { to: "/atividades/frequencia", label: "Frequência", icon: UserCheck },
+      { to: "/presenca", label: "Lista de Presença", icon: ClipboardList },
       { to: "/atividades/calendario", label: "Calendário", icon: FileBarChart2 },
+
     ],
   },
   {
