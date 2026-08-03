@@ -782,6 +782,74 @@ export type Database = {
           },
         ]
       }
+      listas_presenca: {
+        Row: {
+          ano: number
+          autor: string | null
+          created_at: string
+          dispositivo: string | null
+          educador: string | null
+          filtros: Json
+          id: string
+          marcacoes: Json
+          mes: number
+          participantes: Json
+          projeto: string | null
+          total_alunos: number
+          turma: string | null
+          turma_id: string | null
+          turno: string | null
+          unidade: string | null
+          updated_at: string
+        }
+        Insert: {
+          ano: number
+          autor?: string | null
+          created_at?: string
+          dispositivo?: string | null
+          educador?: string | null
+          filtros?: Json
+          id?: string
+          marcacoes?: Json
+          mes: number
+          participantes?: Json
+          projeto?: string | null
+          total_alunos?: number
+          turma?: string | null
+          turma_id?: string | null
+          turno?: string | null
+          unidade?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ano?: number
+          autor?: string | null
+          created_at?: string
+          dispositivo?: string | null
+          educador?: string | null
+          filtros?: Json
+          id?: string
+          marcacoes?: Json
+          mes?: number
+          participantes?: Json
+          projeto?: string | null
+          total_alunos?: number
+          turma?: string | null
+          turma_id?: string | null
+          turno?: string | null
+          unidade?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listas_presenca_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matriculas: {
         Row: {
           autorizacao_assinada: boolean
@@ -919,6 +987,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      presenca_logs: {
+        Row: {
+          acao: string
+          autor: string | null
+          created_at: string
+          descricao: string
+          detalhes: Json | null
+          dispositivo: string | null
+          id: string
+          lista_id: string | null
+        }
+        Insert: {
+          acao: string
+          autor?: string | null
+          created_at?: string
+          descricao: string
+          detalhes?: Json | null
+          dispositivo?: string | null
+          id?: string
+          lista_id?: string | null
+        }
+        Update: {
+          acao?: string
+          autor?: string | null
+          created_at?: string
+          descricao?: string
+          detalhes?: Json | null
+          dispositivo?: string | null
+          id?: string
+          lista_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "presenca_logs_lista_id_fkey"
+            columns: ["lista_id"]
+            isOneToOne: false
+            referencedRelation: "listas_presenca"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       projeto_participantes: {
         Row: {
