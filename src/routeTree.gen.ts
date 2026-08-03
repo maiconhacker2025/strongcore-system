@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlertasRouteImport } from './routes/alertas'
 import { Route as IaRouteImport } from './routes/ia'
 import { Route as ImportarRouteImport } from './routes/importar'
+import { Route as PresencaRouteImport } from './routes/presenca'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as AtividadesIndexRouteImport } from './routes/atividades.index'
 import { Route as AtividadesAvaliacoesRouteImport } from './routes/atividades.avaliacoes'
@@ -47,6 +48,11 @@ const IaRoute = IaRouteImport.update({
 const ImportarRoute = ImportarRouteImport.update({
   id: '/importar',
   path: '/importar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PresencaRoute = PresencaRouteImport.update({
+  id: '/presenca',
+  path: '/presenca',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RelatoriosRoute = RelatoriosRouteImport.update({
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/alertas': typeof AlertasRoute
   '/ia': typeof IaRoute
   '/importar': typeof ImportarRoute
+  '/presenca': typeof PresencaRoute
   '/relatorios': typeof RelatoriosRoute
   '/atividades/avaliacoes': typeof AtividadesAvaliacoesRoute
   '/atividades/calendario': typeof AtividadesCalendarioRoute
@@ -151,6 +158,7 @@ export interface FileRoutesByTo {
   '/alertas': typeof AlertasRoute
   '/ia': typeof IaRoute
   '/importar': typeof ImportarRoute
+  '/presenca': typeof PresencaRoute
   '/relatorios': typeof RelatoriosRoute
   '/atividades/avaliacoes': typeof AtividadesAvaliacoesRoute
   '/atividades/calendario': typeof AtividadesCalendarioRoute
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/alertas': typeof AlertasRoute
   '/ia': typeof IaRoute
   '/importar': typeof ImportarRoute
+  '/presenca': typeof PresencaRoute
   '/relatorios': typeof RelatoriosRoute
   '/atividades/avaliacoes': typeof AtividadesAvaliacoesRoute
   '/atividades/calendario': typeof AtividadesCalendarioRoute
@@ -196,6 +205,7 @@ export interface FileRouteTypes {
     | '/alertas'
     | '/ia'
     | '/importar'
+    | '/presenca'
     | '/relatorios'
     | '/atividades/avaliacoes'
     | '/atividades/calendario'
@@ -217,6 +227,7 @@ export interface FileRouteTypes {
     | '/alertas'
     | '/ia'
     | '/importar'
+    | '/presenca'
     | '/relatorios'
     | '/atividades/avaliacoes'
     | '/atividades/calendario'
@@ -238,6 +249,7 @@ export interface FileRouteTypes {
     | '/alertas'
     | '/ia'
     | '/importar'
+    | '/presenca'
     | '/relatorios'
     | '/atividades/avaliacoes'
     | '/atividades/calendario'
@@ -260,6 +272,7 @@ export interface RootRouteChildren {
   AlertasRoute: typeof AlertasRoute
   IaRoute: typeof IaRoute
   ImportarRoute: typeof ImportarRoute
+  PresencaRoute: typeof PresencaRoute
   RelatoriosRoute: typeof RelatoriosRoute
   AtividadesAvaliacoesRoute: typeof AtividadesAvaliacoesRoute
   AtividadesCalendarioRoute: typeof AtividadesCalendarioRoute
@@ -305,6 +318,13 @@ declare module '@tanstack/react-router' {
       path: '/importar'
       fullPath: '/importar'
       preLoaderRoute: typeof ImportarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/presenca': {
+      id: '/presenca'
+      path: '/presenca'
+      fullPath: '/presenca'
+      preLoaderRoute: typeof PresencaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/relatorios': {
@@ -420,6 +440,7 @@ const rootRouteChildren: RootRouteChildren = {
   AlertasRoute: AlertasRoute,
   IaRoute: IaRoute,
   ImportarRoute: ImportarRoute,
+  PresencaRoute: PresencaRoute,
   RelatoriosRoute: RelatoriosRoute,
   AtividadesAvaliacoesRoute: AtividadesAvaliacoesRoute,
   AtividadesCalendarioRoute: AtividadesCalendarioRoute,
