@@ -9,7 +9,7 @@ import logo from "@/assets/logo-progredir.jpg";
 import { ensureAccessAccount } from "@/lib/access-account.functions";
 
 const ACCESS_EMAIL = "acesso@progredir.local";
-const ACCESS_PASSWORD = "@adm123";
+const ACCESS_PASSWORD = "@adm2026";
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
