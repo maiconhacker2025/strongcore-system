@@ -70,7 +70,7 @@ function ListPage() {
   });
 
   const setFilter = (f: Filter) => {
-    navigate({ search: f === "todos" ? {} : { status: f } });
+    navigate({ search: () => (f === "todos" ? {} : { status: f }) });
   };
 
   const titleMap: Record<Filter, string> = {
