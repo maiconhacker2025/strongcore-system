@@ -284,13 +284,19 @@ export async function backupPdf(): Promise<number> {
 
 export async function runFullBackup() {
   try {
-    toast.loading("Gerando backup completo...", { id: "backup" });
+    toast.loading("Gerando backup completo do sistema...", { id: "backup" });
     const n = await backupExcel();
     await backupPdf();
+    const counts = await backupSistemaCompleto();
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
     markBackupDone();
-    toast.success(`Backup concluído! ${n} registro(s) salvos em Excel e PDF.`, { id: "backup" });
+    toast.success(
+      `Backup completo concluído! ${n} beneficiário(s) em Excel/PDF + ${total} registro(s) de ${Object.keys(counts).length} tabelas (Excel + JSON).`,
+      { id: "backup", duration: 8000 }
+    );
   } catch (e: any) {
     console.error(e);
     toast.error(`Erro no backup: ${e?.message ?? e}`, { id: "backup" });
   }
 }
+
