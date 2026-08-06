@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 const ACCESS_EMAIL = "acesso@progredir.local";
-const ACCESS_PASSWORD = "@adm123";
+const ACCESS_PASSWORD = "@adm2026";
 
 // Ensures the single shared access account exists with the canonical password.
 // Safe to call from the login screen — it only touches one fixed account.
