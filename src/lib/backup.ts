@@ -44,6 +44,51 @@ function downloadBlob(blob: Blob, filename: string) {
   }, 1000);
 }
 
+// Todas as tabelas do sistema incluídas no backup completo
+export const BACKUP_TABLES = [
+  "beneficiarios",
+  "beneficiario_arquivos",
+  "beneficiario_eventos",
+  "oficinas",
+  "turmas",
+  "matriculas",
+  "aulas",
+  "frequencias",
+  "listas_presenca",
+  "presenca_logs",
+  "avaliacoes",
+  "certificados",
+  "eventos",
+  "evento_participantes",
+  "projetos",
+  "projeto_participantes",
+  "atividade_historico",
+  "report_views",
+  "report_settings",
+  "report_logs",
+] as const;
+
+async function fetchTable(table: string) {
+  const all: any[] = [];
+  const pageSize = 1000;
+  let from = 0;
+  while (true) {
+    const { data, error } = await (supabase as any)
+      .from(table)
+      .select("*")
+      .range(from, from + pageSize - 1);
+    if (error) {
+      console.warn(`[backup] ${table}: ${error.message}`);
+      break;
+    }
+    if (!data || data.length === 0) break;
+    all.push(...data);
+    if (data.length < pageSize) break;
+    from += pageSize;
+  }
+  return all;
+}
+
 async function fetchAll() {
   const all: any[] = [];
   const pageSize = 1000;
@@ -62,6 +107,66 @@ async function fetchAll() {
   }
   return all;
 }
+
+function flattenRow(row: any) {
+  const out: any = {};
+  for (const [k, v] of Object.entries(row ?? {})) {
+    out[k] = v && typeof v === "object" ? JSON.stringify(v) : v;
+  }
+  return out;
+}
+
+/** Backup completo do sistema: 1 planilha por tabela + JSON bruto restaurável. */
+export async function backupSistemaCompleto(): Promise<Record<string, number>> {
+  const dump: Record<string, any[]> = {};
+  const counts: Record<string, number> = {};
+
+  for (const t of BACKUP_TABLES) {
+    const rows = await fetchTable(t);
+    dump[t] = rows;
+    counts[t] = rows.length;
+  }
+
+  const wb = XLSX.utils.book_new();
+
+  const resumo: any[][] = [
+    ["Backup completo do sistema — Espaço Progredir"],
+    ["Gerado em", new Date().toLocaleString("pt-BR")],
+    [],
+    ["Tabela", "Registros"],
+    ...BACKUP_TABLES.map((t) => [t, counts[t] ?? 0]),
+    [],
+    ["TOTAL", Object.values(counts).reduce((a, b) => a + b, 0)],
+  ];
+  const wsResumo = XLSX.utils.aoa_to_sheet(resumo);
+  wsResumo["!cols"] = [{ wch: 30 }, { wch: 18 }];
+  XLSX.utils.book_append_sheet(wb, wsResumo, "Resumo");
+
+  for (const t of BACKUP_TABLES) {
+    const rows = dump[t] ?? [];
+    if (!rows.length) continue;
+    const ws = XLSX.utils.json_to_sheet(rows.map(flattenRow));
+    ws["!cols"] = Object.keys(flattenRow(rows[0])).map(() => ({ wch: 20 }));
+    XLSX.utils.book_append_sheet(wb, ws, t.slice(0, 31));
+  }
+
+  const ab = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  downloadBlob(
+    new Blob([ab], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }),
+    `backup-sistema-completo-${timestamp()}.xlsx`
+  );
+
+  // JSON bruto (restauração fiel, inclui campos JSON aninhados)
+  downloadBlob(
+    new Blob([JSON.stringify({ gerado_em: new Date().toISOString(), tabelas: dump }, null, 2)], {
+      type: "application/json",
+    }),
+    `backup-sistema-completo-${timestamp()}.json`
+  );
+
+  return counts;
+}
+
 
 function todayBR() {
   return new Date().toLocaleDateString("pt-BR");
@@ -179,13 +284,19 @@ export async function backupPdf(): Promise<number> {
 
 export async function runFullBackup() {
   try {
-    toast.loading("Gerando backup completo...", { id: "backup" });
+    toast.loading("Gerando backup completo do sistema...", { id: "backup" });
     const n = await backupExcel();
     await backupPdf();
+    const counts = await backupSistemaCompleto();
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
     markBackupDone();
-    toast.success(`Backup concluído! ${n} registro(s) salvos em Excel e PDF.`, { id: "backup" });
+    toast.success(
+      `Backup completo concluído! ${n} beneficiário(s) em Excel/PDF + ${total} registro(s) de ${Object.keys(counts).length} tabelas (Excel + JSON).`,
+      { id: "backup", duration: 8000 }
+    );
   } catch (e: any) {
     console.error(e);
     toast.error(`Erro no backup: ${e?.message ?? e}`, { id: "backup" });
   }
 }
+
