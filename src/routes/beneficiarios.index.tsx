@@ -24,7 +24,7 @@ export const Route = createFileRoute("/beneficiarios/")({
 type Filter = "todos" | "ativos" | "inativos";
 
 function ListPage() {
-  const navigate = useNavigate({ from: "/beneficiarios" });
+  const navigate = useNavigate({ from: "/beneficiarios/" });
   const { status } = useSearch({ from: "/beneficiarios/" });
   const filter: Filter = status ?? "todos";
   const [q, setQ] = useState("");
