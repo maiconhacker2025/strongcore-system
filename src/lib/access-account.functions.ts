@@ -1,12 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 
-const ACCESS_EMAIL = "acesso@progredir.local";
-const ACCESS_PASSWORD = "@adm123";
-
 // Ensures the single shared access account exists with the canonical password.
 // Safe to call from the login screen — it only touches one fixed account.
 export const ensureAccessAccount = createServerFn({ method: "POST" }).handler(
   async () => {
+    const accessEmail = "acesso@progredir.local";
+    const accessPassword = "@adm2026";
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Find existing user by email
@@ -16,7 +15,7 @@ export const ensureAccessAccount = createServerFn({ method: "POST" }).handler(
     });
     if (listErr) throw new Error(listErr.message);
 
-    const existing = list.users.find((u) => u.email === ACCESS_EMAIL);
+    const existing = list.users.find((u) => u.email === accessEmail);
 
     const grantRoles = async (userId: string) => {
       await supabaseAdmin
@@ -32,7 +31,7 @@ export const ensureAccessAccount = createServerFn({ method: "POST" }).handler(
 
     if (existing) {
       const { error } = await supabaseAdmin.auth.admin.updateUserById(existing.id, {
-        password: ACCESS_PASSWORD,
+        password: accessPassword,
         email_confirm: true,
       });
       if (error) throw new Error(error.message);
@@ -41,8 +40,8 @@ export const ensureAccessAccount = createServerFn({ method: "POST" }).handler(
     }
 
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
-      email: ACCESS_EMAIL,
-      password: ACCESS_PASSWORD,
+      email: accessEmail,
+      password: accessPassword,
       email_confirm: true,
     });
     if (error) throw new Error(error.message);
