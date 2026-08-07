@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { QuickSearch } from "@/components/QuickSearch";
 import { Button } from "@/components/ui/button";
 import { runFullBackup, daysSinceBackup } from "@/lib/backup";
-import { AuthGate, LogoutButton } from "@/components/AuthGate";
+import { AuthGate } from "@/components/AuthGate";
 import { GamificationHUD } from "@/components/GamificationHUD";
 import logo from "@/assets/logo-progredir.jpg";
 import { useEffect, useState } from "react";
