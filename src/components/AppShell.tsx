@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { QuickSearch } from "@/components/QuickSearch";
 import { Button } from "@/components/ui/button";
 import { runFullBackup, daysSinceBackup } from "@/lib/backup";
-import { AuthGate, LogoutButton } from "@/components/AuthGate";
+import { AuthGate } from "@/components/AuthGate";
 import { GamificationHUD } from "@/components/GamificationHUD";
 import logo from "@/assets/logo-progredir.jpg";
 import { useEffect, useState } from "react";
@@ -145,9 +145,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               <Download className="size-3.5" /> Gerar Backup
             </Button>
-          </div>
-          <div className="pt-3 flex justify-center">
-            <LogoutButton />
           </div>
         </div>
       </aside>
