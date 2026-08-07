@@ -14,49 +14,55 @@ const ACCESS_PASSWORD = "@adm2026";
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [authed, setAuthed] = useState(false);
-  const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setAuthed(!!session);
     });
-    supabase.auth.getSession().then(({ data }) => {
-      setAuthed(!!data.session);
-      setReady(true);
-    });
-    return () => sub.subscription.unsubscribe();
-  }, []);
 
-  const tryLogin = async (pwd: string) => {
-    return supabase.auth.signInWithPassword({ email: ACCESS_EMAIL, password: pwd });
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!password) return;
-    setBusy(true);
-    try {
-      let { error } = await tryLogin(password);
-      if (error && /Invalid login credentials/i.test(error.message) && password === ACCESS_PASSWORD) {
-        // Bootstrap or repair the shared account, then retry once.
-        await ensureAccessAccount();
-        const r = await tryLogin(password);
-        error = r.error;
+    const autoLogin = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        if (!cancelled) {
+          setAuthed(true);
+          setReady(true);
+        }
+        return;
       }
-      if (error) throw error;
-      toast.success("Acesso liberado");
-    } catch (err: any) {
-      toast.error(err?.message || "Senha incorreta");
-    } finally {
-      setBusy(false);
-    }
-  };
+      let res = await supabase.auth.signInWithPassword({
+        email: ACCESS_EMAIL,
+        password: ACCESS_PASSWORD,
+      });
+      if (res.error) {
+        try {
+          await ensureAccessAccount();
+          res = await supabase.auth.signInWithPassword({
+            email: ACCESS_EMAIL,
+            password: ACCESS_PASSWORD,
+          });
+        } catch (err: any) {
+          if (!cancelled) setError(err?.message || "Falha ao liberar acesso");
+        }
+      }
+      if (cancelled) return;
+      if (res.error) setError(res.error.message);
+      setAuthed(!res.error);
+      setReady(true);
+    };
+    autoLogin();
+
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
 
   if (!ready) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-sm text-muted-foreground">Carregando…</div>
+        <div className="text-sm text-muted-foreground">Abrindo o sistema…</div>
       </div>
     );
   }
@@ -64,30 +70,18 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   if (!authed) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-primary/10 px-4">
-        <Card className="w-full max-w-md p-8 shadow-xl">
-          <div className="flex flex-col items-center text-center mb-6">
-            <img src={logo} alt="Espaço Progredir" className="h-20 object-contain mb-4" />
-            <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-              <Lock className="size-5 text-primary" />
-            </div>
-            <h1 className="font-display text-2xl font-bold">Acesso restrito</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Este sistema contém dados pessoais sensíveis.<br />Informe a senha para continuar.
-            </p>
+        <Card className="w-full max-w-md p-8 shadow-xl text-center">
+          <img src={logo} alt="Espaço Progredir" className="h-20 object-contain mx-auto mb-4" />
+          <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+            <Lock className="size-5 text-primary" />
           </div>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <Input
-              type="password"
-              placeholder="Senha"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoFocus
-              disabled={busy}
-            />
-            <Button type="submit" className="w-full" disabled={busy || !password}>
-              {busy ? "Verificando…" : "Entrar"}
-            </Button>
-          </form>
+          <h1 className="font-display text-2xl font-bold">Não foi possível abrir</h1>
+          <p className="text-sm text-muted-foreground mt-2">
+            {error || "O banco de dados pode estar pausado. Ative o backend e recarregue."}
+          </p>
+          <Button className="w-full mt-5" onClick={() => window.location.reload()}>
+            Tentar novamente
+          </Button>
         </Card>
       </div>
     );
@@ -95,6 +89,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
+
 
 export function LogoutButton() {
   return (
