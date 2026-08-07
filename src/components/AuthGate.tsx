@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Lock, LogOut } from "lucide-react";
-import { toast } from "sonner";
 import logo from "@/assets/logo-progredir.jpg";
 import { ensureAccessAccount } from "@/lib/access-account.functions";
+
 
 const ACCESS_EMAIL = "acesso@progredir.local";
 const ACCESS_PASSWORD = "@adm2026";
