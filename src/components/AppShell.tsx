@@ -146,9 +146,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Download className="size-3.5" /> Gerar Backup
             </Button>
           </div>
-          <div className="pt-3 flex justify-center">
-            <LogoutButton />
-          </div>
         </div>
       </aside>
 
