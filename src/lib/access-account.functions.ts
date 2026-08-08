@@ -4,6 +4,7 @@ import { createServerFn } from "@tanstack/react-start";
 // Safe to call from the login screen — it only touches one fixed account.
 export const ensureAccessAccount = createServerFn({ method: "POST" }).handler(
   async () => {
+   try {
     const accessEmail = "acesso@progredir.local";
     const accessPassword = "@adm2026";
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -47,5 +48,9 @@ export const ensureAccessAccount = createServerFn({ method: "POST" }).handler(
     if (error) throw new Error(error.message);
     if (created?.user) await grantRoles(created.user.id);
     return { ok: true, action: "created" as const };
+   } catch (error) {
+    console.error(error);
+    return { ok: false, action: "failed" as const };
+   }
   },
 );
