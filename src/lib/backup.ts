@@ -167,6 +167,122 @@ export async function backupSistemaCompleto(): Promise<Record<string, number>> {
   return counts;
 }
 
+function cellText(v: any): string {
+  if (v === null || v === undefined || v === "") return "—";
+  if (typeof v === "boolean") return v ? "Sim" : "Não";
+  if (typeof v === "object") return JSON.stringify(v);
+  const s = String(v);
+  return s.length > 220 ? s.slice(0, 217) + "..." : s;
+}
+
+function prettyCol(c: string) {
+  return c.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
+/** Backup geral do sistema em PDF: todas as tabelas, todos os registros, todas as colunas. */
+export async function backupPdfSistemaCompleto(): Promise<Record<string, number>> {
+  const dump: Record<string, any[]> = {};
+  const counts: Record<string, number> = {};
+
+  for (const t of BACKUP_TABLES) {
+    const rows = await fetchTable(t);
+    dump[t] = rows;
+    counts[t] = rows.length;
+  }
+
+  const doc = new jsPDF({ unit: "pt", format: "a4", orientation: "landscape" });
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+
+  // Capa
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(26);
+  doc.setTextColor(6, 59, 56);
+  doc.text("Backup Geral do Sistema", 40, 90);
+  doc.setFontSize(14);
+  doc.setTextColor(120);
+  doc.setFont("helvetica", "normal");
+  doc.text("Espaço Progredir · Sistema de Beneficiários", 40, 116);
+  doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")}`, 40, 138);
+
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  autoTable(doc, {
+    startY: 170,
+    head: [["#", "Tabela", "Registros", "Colunas"]],
+    body: BACKUP_TABLES.map((t, i) => [
+      i + 1,
+      t,
+      counts[t] ?? 0,
+      dump[t]?.length ? Object.keys(dump[t][0]).length : 0,
+    ]),
+    foot: [["", "TOTAL", total, ""]],
+    styles: { fontSize: 9, cellPadding: 4 },
+    headStyles: { fillColor: [6, 59, 56], textColor: 255 },
+    footStyles: { fillColor: [245, 158, 11], textColor: [6, 59, 56], fontStyle: "bold" },
+    margin: { left: 40, right: 40 },
+  });
+
+  const COLS_PER_BLOCK = 7;
+
+  for (const t of BACKUP_TABLES) {
+    const rows = dump[t] ?? [];
+    doc.addPage("a4", "landscape");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(6, 59, 56);
+    doc.text(prettyCol(t), 40, 50);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(130);
+    doc.text(`${rows.length} registro(s)`, 40, 66);
+
+    if (!rows.length) continue;
+
+    const columns = Array.from(
+      rows.reduce((set: Set<string>, r) => {
+        Object.keys(r ?? {}).forEach((k) => set.add(k));
+        return set;
+      }, new Set<string>())
+    );
+
+    let y = 84;
+    for (let i = 0; i < columns.length; i += COLS_PER_BLOCK) {
+      const block = columns.slice(i, i + COLS_PER_BLOCK);
+      autoTable(doc, {
+        startY: y,
+        head: [["#", ...block.map(prettyCol)]],
+        body: rows.map((r, idx) => [idx + 1, ...block.map((c) => cellText(r?.[c]))]),
+        styles: { fontSize: 6.5, cellPadding: 2, overflow: "linebreak", valign: "top" },
+        headStyles: { fillColor: [13, 148, 136], textColor: 255, fontSize: 6.5 },
+        alternateRowStyles: { fillColor: [244, 250, 249] },
+        columnStyles: { 0: { cellWidth: 22, halign: "right" } },
+        margin: { left: 40, right: 40, top: 40 },
+        tableWidth: "auto",
+      });
+      y = (doc as any).lastAutoTable.finalY + 18;
+      if (y > H - 120 && i + COLS_PER_BLOCK < columns.length) {
+        doc.addPage("a4", "landscape");
+        y = 50;
+      }
+    }
+  }
+
+  // Rodapé com paginação
+  const pages = doc.getNumberOfPages();
+  for (let p = 1; p <= pages; p++) {
+    doc.setPage(p);
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text("Backup Geral · Espaço Progredir", 40, H - 20);
+    doc.text(`Página ${p} de ${pages}`, W - 100, H - 20);
+  }
+
+  doc.save(`backup-geral-sistema-${timestamp()}.pdf`);
+  return counts;
+}
+
+
+
 
 function todayBR() {
   return new Date().toLocaleDateString("pt-BR");
@@ -288,10 +404,11 @@ export async function runFullBackup() {
     const n = await backupExcel();
     await backupPdf();
     const counts = await backupSistemaCompleto();
+    await backupPdfSistemaCompleto();
     const total = Object.values(counts).reduce((a, b) => a + b, 0);
     markBackupDone();
     toast.success(
-      `Backup completo concluído! ${n} beneficiário(s) em Excel/PDF + ${total} registro(s) de ${Object.keys(counts).length} tabelas (Excel + JSON).`,
+      `Backup completo concluído! ${n} beneficiário(s) em Excel/PDF + ${total} registro(s) de ${Object.keys(counts).length} tabelas (Excel + JSON + PDF geral).`,
       { id: "backup", duration: 8000 }
     );
   } catch (e: any) {
@@ -299,4 +416,5 @@ export async function runFullBackup() {
     toast.error(`Erro no backup: ${e?.message ?? e}`, { id: "backup" });
   }
 }
+
 
