@@ -221,9 +221,15 @@ function Dashboard() {
           <Button variant="outline" className="rounded-xl border-slate-200" onClick={() => backupExcel().then((n) => n && toast.success(`Excel baixado · ${n} registros`))}>
             <FileSpreadsheet className="size-4" /> Excel completo
           </Button>
-          <Button variant="outline" className="rounded-xl border-slate-200" onClick={() => backupPdf().then((n) => n && toast.success(`PDF baixado · ${n} registros`))}>
-            <FileType2 className="size-4" /> PDF completo
+          <Button variant="outline" className="rounded-xl border-slate-200" onClick={() => {
+            toast.loading("Gerando PDF geral do sistema...", { id: "pdfgeral" });
+            backupPdfSistemaCompleto()
+              .then((c) => toast.success(`PDF geral baixado · ${Object.values(c).reduce((a, b) => a + b, 0)} registros de ${Object.keys(c).length} tabelas`, { id: "pdfgeral" }))
+              .catch((e) => toast.error(`Erro: ${e?.message ?? e}`, { id: "pdfgeral" }));
+          }}>
+            <FileType2 className="size-4" /> PDF geral (tudo)
           </Button>
+
           <Button className="rounded-xl bg-amber-500 hover:bg-amber-400 text-[#063b38] font-bold shadow-sm" onClick={runFullBackup}>
             <Download className="size-4" /> Backup semanal
           </Button>
