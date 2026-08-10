@@ -224,8 +224,9 @@ function Dashboard() {
           <Button variant="outline" className="rounded-xl border-slate-200" onClick={() => {
             toast.loading("Gerando PDF geral do sistema...", { id: "pdfgeral" });
             backupPdfSistemaCompleto()
-              .then((c) => toast.success(`PDF geral baixado · ${Object.values(c).reduce((a, b) => a + b, 0)} registros de ${Object.keys(c).length} tabelas`, { id: "pdfgeral" }))
-              .catch((e) => toast.error(`Erro: ${e?.message ?? e}`, { id: "pdfgeral" }));
+              .then((c: Record<string, number>) => toast.success(`PDF geral baixado · ${Object.values(c).reduce((a, b) => a + b, 0)} registros de ${Object.keys(c).length} tabelas`, { id: "pdfgeral" }))
+              .catch((e: any) => toast.error(`Erro: ${e?.message ?? e}`, { id: "pdfgeral" }));
+
           }}>
             <FileType2 className="size-4" /> PDF geral (tudo)
           </Button>
