@@ -13,7 +13,7 @@ import {
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip,
   PieChart, Pie, Cell, Legend,
 } from "recharts";
-import { backupExcel, backupPdf, runFullBackup } from "@/lib/backup";
+import { backupExcel, backupPdf, runFullBackup, backupPdfSistemaCompleto } from "@/lib/backup";
 import { exportPdf, exportXlsx, type ReportTable } from "@/lib/export-report";
 import { toast } from "sonner";
 
