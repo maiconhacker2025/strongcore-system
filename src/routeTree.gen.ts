@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlertasRouteImport } from './routes/alertas'
+import { Route as ChamadaRouteImport } from './routes/chamada'
 import { Route as IaRouteImport } from './routes/ia'
 import { Route as ImportarRouteImport } from './routes/importar'
 import { Route as PresencaRouteImport } from './routes/presenca'
@@ -38,6 +39,11 @@ const IndexRoute = IndexRouteImport.update({
 const AlertasRoute = AlertasRouteImport.update({
   id: '/alertas',
   path: '/alertas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChamadaRoute = ChamadaRouteImport.update({
+  id: '/chamada',
+  path: '/chamada',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IaRoute = IaRouteImport.update({
@@ -134,6 +140,7 @@ const BeneficiariosNovoRoute = BeneficiariosNovoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/alertas': typeof AlertasRoute
+  '/chamada': typeof ChamadaRoute
   '/ia': typeof IaRoute
   '/importar': typeof ImportarRoute
   '/presenca': typeof PresencaRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/alertas': typeof AlertasRoute
+  '/chamada': typeof ChamadaRoute
   '/ia': typeof IaRoute
   '/importar': typeof ImportarRoute
   '/presenca': typeof PresencaRoute
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/alertas': typeof AlertasRoute
+  '/chamada': typeof ChamadaRoute
   '/ia': typeof IaRoute
   '/importar': typeof ImportarRoute
   '/presenca': typeof PresencaRoute
@@ -203,6 +212,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/alertas'
+    | '/chamada'
     | '/ia'
     | '/importar'
     | '/presenca'
@@ -225,6 +235,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/alertas'
+    | '/chamada'
     | '/ia'
     | '/importar'
     | '/presenca'
@@ -247,6 +258,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/alertas'
+    | '/chamada'
     | '/ia'
     | '/importar'
     | '/presenca'
@@ -270,6 +282,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AlertasRoute: typeof AlertasRoute
+  ChamadaRoute: typeof ChamadaRoute
   IaRoute: typeof IaRoute
   ImportarRoute: typeof ImportarRoute
   PresencaRoute: typeof PresencaRoute
@@ -304,6 +317,13 @@ declare module '@tanstack/react-router' {
       path: '/alertas'
       fullPath: '/alertas'
       preLoaderRoute: typeof AlertasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chamada': {
+      id: '/chamada'
+      path: '/chamada'
+      fullPath: '/chamada'
+      preLoaderRoute: typeof ChamadaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ia': {
@@ -438,6 +458,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AlertasRoute: AlertasRoute,
+  ChamadaRoute: ChamadaRoute,
   IaRoute: IaRoute,
   ImportarRoute: ImportarRoute,
   PresencaRoute: PresencaRoute,

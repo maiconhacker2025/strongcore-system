@@ -30,6 +30,7 @@ const navGroups = [
       { to: "/atividades/turmas", label: "Turmas & Matrículas", icon: Users },
       { to: "/atividades/frequencia", label: "Frequência", icon: UserCheck },
       { to: "/presenca", label: "Lista de Presença", icon: ClipboardList },
+      { to: "/chamada", label: "App de Chamada", icon: ClipboardList },
       { to: "/atividades/calendario", label: "Calendário", icon: FileBarChart2 },
 
     ],
