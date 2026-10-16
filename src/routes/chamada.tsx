@@ -21,7 +21,7 @@ export const Route = createFileRoute("/chamada")({
   head: () => ({
     meta: [
       { title: "Chamada · Espaço Progredir" },
-      { name: "description", content: "Aplicativo de chamada dos educadores do Espaço Progredir: presença rápida por turma, direto na lista de presença." },
+      { name: "description", content: "Aplicativo de chamada dos educadores do Espaço Progredir: presença rápida por turno (manhã e tarde), direto na lista de presença." },
       { name: "theme-color", content: "#063b38" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
