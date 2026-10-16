@@ -279,7 +279,7 @@ function ChamadaApp() {
             </div>
             <h1 className="text-2xl font-display font-bold">Chamada salva!</h1>
             <p className="text-sm text-slate-500 mt-2">
-              {presentes} de {alunos.length} presentes em {turma?.nome}.<br />
+              {presentes} de {alunos.length} presentes em {titulo}.<br />
               A lista de presença do mês já foi atualizada.
             </p>
             <Button onClick={voltar} className="mt-6 bg-[#063b38] hover:bg-[#0a4f4a] h-12 px-8 rounded-2xl">
@@ -290,7 +290,7 @@ function ChamadaApp() {
       </main>
 
       {/* Botão fixo de salvar */}
-      {grupo && turmaId && !salvo && alunos.length > 0 && (
+      {grupo && turno && !salvo && alunos.length > 0 && (
         <div className="fixed bottom-0 inset-x-0 p-4 bg-gradient-to-t from-[#063b38] via-[#063b38]/95 to-transparent">
           <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}
             className="w-full h-14 rounded-2xl bg-amber-400 hover:bg-amber-300 text-[#063b38] font-bold text-base shadow-xl">
