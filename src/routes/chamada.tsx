@@ -183,8 +183,8 @@ function ChamadaApp() {
           </div>
         )}
 
-        {/* Passo 2: turma + data */}
-        {grupo && !turmaId && !salvo && (
+        {/* Passo 2: turno + data */}
+        {grupo && !turno && !salvo && (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
             <h1 className="text-xl font-display font-bold">{GRUPOS[grupo].icone} {GRUPOS[grupo].nome}</h1>
             <div>
@@ -196,22 +196,16 @@ function ChamadaApp() {
               <Input value={educador} onChange={(e) => setEducador(e.target.value)} placeholder="Ex.: Renata" className="mt-1 h-12 text-base bg-white" />
             </div>
             <div className="space-y-2 pt-2">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Escolha a turma</p>
-              {turmasDoGrupo.length === 0 && (
-                <p className="text-sm text-slate-500 bg-white rounded-2xl p-4 border border-dashed">Nenhuma turma deste grupo cadastrada ainda.</p>
-              )}
-              {turmasDoGrupo.map((t: any) => (
-                <button key={t.id} onClick={() => setTurmaId(t.id)}
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Escolha o turno</p>
+              {TURNOS_APP.map((t) => (
+                <button key={t.value} onClick={() => setTurno(t.value)}
                   className="w-full text-left rounded-2xl border-2 border-slate-200 bg-white p-4 flex items-center gap-3 active:scale-[0.98] transition-all">
-                  <div className="size-10 rounded-xl bg-[#063b38] text-white grid place-items-center shrink-0">
-                    <Users className="size-5" />
-                  </div>
+                  <span className="text-3xl">{t.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold truncate">{t.nome}</p>
-                    <p className="text-xs text-slate-500 truncate">
-                      {oficinaMap.get(t.oficina_id)?.nome}{t.horario_inicio ? ` · ${t.horario_inicio}` : ""}
-                    </p>
+                    <p className="font-semibold">{t.value}</p>
+                    <p className="text-xs text-slate-500">{doGrupo(grupo, t.value).length} aluno(s)</p>
                   </div>
+                  <Users className="size-5 text-slate-400" />
                 </button>
               ))}
             </div>
@@ -219,11 +213,11 @@ function ChamadaApp() {
         )}
 
         {/* Passo 3: chamada */}
-        {grupo && turmaId && !salvo && (
+        {grupo && turno && !salvo && (
           <div className="animate-in fade-in slide-in-from-bottom-2">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h1 className="text-lg font-display font-bold leading-tight">{turma?.nome}</h1>
+                <h1 className="text-lg font-display font-bold leading-tight">{titulo}</h1>
                 <p className="text-xs text-slate-500">{new Date(data + "T12:00:00").toLocaleDateString("pt-BR")} · {presentes}/{alunos.length} presentes</p>
               </div>
               <button onClick={() => {
