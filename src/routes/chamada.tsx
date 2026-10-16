@@ -165,10 +165,7 @@ function ChamadaApp() {
             <h1 className="text-xl font-display font-bold">Qual grupo você vai chamar?</h1>
             {(["crescer", "jovem"] as GrupoKey[]).map((k) => {
               const g = GRUPOS[k];
-              const qtd = turmas.filter((t: any) => {
-                const of = oficinaMap.get(t.oficina_id);
-                return of?.grupo === k || of?.grupo === "ambos";
-              }).length;
+              const qtd = doGrupo(k).length;
               return (
                 <button key={k} onClick={() => setGrupo(k)}
                   className="w-full text-left rounded-3xl border-2 border-slate-200 bg-white p-5 flex items-center gap-4 active:scale-[0.98] transition-all shadow-sm">
