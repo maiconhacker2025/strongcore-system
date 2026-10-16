@@ -65,6 +65,7 @@ function ChamadaApp() {
   const [educador, setEducador] = useState("");
   const [marcas, setMarcas] = useState<Record<string, Status>>({});
   const [salvo, setSalvo] = useState(false);
+  const [resumo, setResumo] = useState({ p: 0, t: 0 });
 
   const { data: beneficiarios = [] } = useQuery({
     queryKey: ["beneficiarios-chamada"],
@@ -130,6 +131,7 @@ function ChamadaApp() {
     onSuccess: () => {
       toast.success("Chamada salva! Já está na lista de presença.");
       qc.invalidateQueries();
+      setResumo({ p: presentes, t: alunos.length });
       setMarcas({});
       setSalvo(true);
     },
@@ -172,7 +174,7 @@ function ChamadaApp() {
                   <span className="text-4xl">{g.icone}</span>
                   <div className="flex-1">
                     <p className="font-bold text-lg">{g.nome}</p>
-                    <p className="text-sm text-slate-500">{g.faixa} · {qtd} turma(s)</p>
+                    <p className="text-sm text-slate-500">{g.faixa} · {qtd} aluno(s) ativos</p>
                   </div>
                 </button>
               );
@@ -228,7 +230,7 @@ function ChamadaApp() {
 
             {alunos.length === 0 ? (
               <p className="text-sm text-slate-500 bg-white rounded-2xl p-6 border border-dashed text-center">
-                Nenhum aluno deste grupo matriculado nesta turma.
+                Nenhum aluno ativo deste grupo neste turno.
               </p>
             ) : (
               <div className="space-y-2.5">
@@ -279,7 +281,7 @@ function ChamadaApp() {
             </div>
             <h1 className="text-2xl font-display font-bold">Chamada salva!</h1>
             <p className="text-sm text-slate-500 mt-2">
-              {presentes} de {alunos.length} presentes em {titulo}.<br />
+              {resumo.p} de {resumo.t} presentes em {titulo}.<br />
               A lista de presença do mês já foi atualizada.
             </p>
             <Button onClick={voltar} className="mt-6 bg-[#063b38] hover:bg-[#0a4f4a] h-12 px-8 rounded-2xl">
