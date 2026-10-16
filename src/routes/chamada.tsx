@@ -172,7 +172,7 @@ function ChamadaApp() {
                   <span className="text-4xl">{g.icone}</span>
                   <div className="flex-1">
                     <p className="font-bold text-lg">{g.nome}</p>
-                    <p className="text-sm text-slate-500">{g.faixa} · {qtd} turma(s)</p>
+                    <p className="text-sm text-slate-500">{g.faixa} · {qtd} aluno(s) ativos</p>
                   </div>
                 </button>
               );
@@ -228,7 +228,7 @@ function ChamadaApp() {
 
             {alunos.length === 0 ? (
               <p className="text-sm text-slate-500 bg-white rounded-2xl p-6 border border-dashed text-center">
-                Nenhum aluno deste grupo matriculado nesta turma.
+                Nenhum aluno ativo deste grupo neste turno.
               </p>
             ) : (
               <div className="space-y-2.5">
