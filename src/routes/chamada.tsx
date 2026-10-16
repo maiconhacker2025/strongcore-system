@@ -21,7 +21,7 @@ export const Route = createFileRoute("/chamada")({
   head: () => ({
     meta: [
       { title: "Chamada · Espaço Progredir" },
-      { name: "description", content: "Aplicativo de chamada dos educadores do Espaço Progredir: presença rápida por turma, direto na lista de presença." },
+      { name: "description", content: "Aplicativo de chamada dos educadores do Espaço Progredir: presença rápida por turno (manhã e tarde), direto na lista de presença." },
       { name: "theme-color", content: "#063b38" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
@@ -52,113 +52,84 @@ const statusParaPresenca: Record<Status, PresencaStatus> = {
   presente: "presente", falta: "falta", justificada: "justificado",
 };
 
+const TURNOS_APP = [
+  { value: "Manhã", icon: "☀️" },
+  { value: "Tarde", icon: "🌇" },
+];
+
 function ChamadaApp() {
   const qc = useQueryClient();
   const [grupo, setGrupo] = useState<GrupoKey | null>(null);
-  const [turmaId, setTurmaId] = useState("");
+  const [turno, setTurno] = useState("");
   const [data, setData] = useState(new Date().toISOString().slice(0, 10));
   const [educador, setEducador] = useState("");
   const [marcas, setMarcas] = useState<Record<string, Status>>({});
   const [salvo, setSalvo] = useState(false);
 
-  const { data: oficinas = [] } = useQuery({ queryKey: ["oficinas"], queryFn: () => fetchAll<any>("oficinas") });
-  const { data: turmas = [] } = useQuery({ queryKey: ["turmas"], queryFn: () => fetchAll<any>("turmas", "*", "nome") });
-  const { data: matriculas = [] } = useQuery({ queryKey: ["matriculas"], queryFn: () => fetchAll<any>("matriculas") });
   const { data: beneficiarios = [] } = useQuery({
     queryKey: ["beneficiarios-chamada"],
-    queryFn: () => fetchAll<any>("beneficiarios", "id,nome,ativo,data_nascimento,alergia,medicacao", "nome"),
+    queryFn: () => fetchAll<any>("beneficiarios", "id,nome,ativo,turno,data_nascimento,alergia,medicacao", "nome"),
   });
 
-  const oficinaMap = useMemo(() => new Map(oficinas.map((o: any) => [o.id, o])), [oficinas]);
-  const benefMap = useMemo(() => new Map(beneficiarios.map((b: any) => [b.id, b])), [beneficiarios]);
+  const doGrupo = (k: GrupoKey, t?: string) => beneficiarios.filter((b: any) =>
+    b.ativo && grupoPorIdade(idadeDe(b.data_nascimento)) === k && (!t || b.turno === t));
 
-  const turmasDoGrupo = useMemo(() => turmas.filter((t: any) => {
-    const of = oficinaMap.get(t.oficina_id);
-    return !grupo || of?.grupo === grupo || of?.grupo === "ambos";
-  }), [turmas, oficinaMap, grupo]);
-
-  const turma = turmas.find((t: any) => t.id === turmaId);
-
-  const alunos = useMemo(() => matriculas
-    .filter((m: any) => m.turma_id === turmaId && !m.lista_espera && m.status === "ativa")
-    .map((m: any) => benefMap.get(m.beneficiario_id))
-    .filter(Boolean)
-    .filter((b: any) => !grupo || grupoPorIdade(idadeDe(b.data_nascimento)) === grupo)
+  const alunos = useMemo(() => (grupo && turno ? doGrupo(grupo, turno) : [])
     .sort((a: any, b: any) => a.nome.localeCompare(b.nome, "pt-BR")),
-  [matriculas, benefMap, turmaId, grupo]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  [beneficiarios, grupo, turno]);
 
   const statusDe = (id: string): Status => marcas[id] ?? "presente";
   const presentes = alunos.filter((b: any) => statusDe(b.id) === "presente").length;
+  const titulo = grupo && turno ? `${GRUPOS[grupo].nome} · ${turno}` : "";
 
   const salvar = useMutation({
     mutationFn: async () => {
-      if (!turmaId || !turma) throw new Error("Selecione a turma");
-      // 1) Aula + frequências (módulo Frequência)
-      const { data: aulaExistente } = await supabase.from("aulas").select("id")
-        .eq("turma_id", turmaId).eq("data", data).maybeSingle();
-      let aulaId = aulaExistente?.id;
-      if (aulaId) {
-        const { error } = await supabase.from("aulas").update({ educador }).eq("id", aulaId);
-        if (error) throw error;
-      } else {
-        const { data: nova, error } = await supabase.from("aulas").insert({
-          turma_id: turmaId, data, educador,
-          horario_inicio: turma.horario_inicio ?? null, horario_fim: turma.horario_fim ?? null,
-        }).select("id").single();
-        if (error) throw error;
-        aulaId = nova.id;
-      }
-      const rows = alunos.map((b: any) => ({
-        aula_id: aulaId, beneficiario_id: b.id, status: statusDe(b.id),
-      }));
-      const { error: e2 } = await supabase.from("frequencias")
-        .upsert(rows, { onConflict: "aula_id,beneficiario_id" });
-      if (e2) throw e2;
-
-      // 2) Lista de presença do mês (módulo Lista de Presença)
+      if (!grupo || !turno) throw new Error("Selecione grupo e turno");
       const d = new Date(data + "T12:00:00");
       const mes = d.getMonth() + 1, ano = d.getFullYear(), dia = String(d.getDate());
-      const { data: listaExistente } = await supabase.from("listas_presenca").select("*")
-        .eq("turma_id", turmaId).eq("mes", mes).eq("ano", ano).maybeSingle();
+      const { data: listas } = await supabase.from("listas_presenca").select("*")
+        .is("turma_id", null).eq("turno", turno).eq("mes", mes).eq("ano", ano);
+      const listaExistente = (listas ?? []).find((l: any) => (l.filtros as any)?.faixa === grupo);
 
       if (listaExistente) {
         const marcacoes = { ...(listaExistente.marcacoes as any) };
+        const participantes = [...((listaExistente.participantes as any[]) ?? [])];
+        const ids = new Set(participantes.map((p: any) => p.id));
         for (const b of alunos) {
+          if (!ids.has(b.id)) participantes.push({ id: b.id, nome: b.nome, data_nascimento: b.data_nascimento, idade: idadeDe(b.data_nascimento) });
           marcacoes[b.id] = { ...(marcacoes[b.id] ?? {}) };
           marcacoes[b.id][dia] = statusParaPresenca[statusDe(b.id)];
         }
+        participantes.sort((a: any, b: any) => a.nome.localeCompare(b.nome, "pt-BR"));
         await salvarLista({
-          ...(listaExistente as any), marcacoes, educador: educador || listaExistente.educador,
+          ...(listaExistente as any), participantes, marcacoes,
+          educador: educador || listaExistente.educador,
         });
       } else {
-        const participantes = await montarParticipantes({ turmaId });
+        const participantes = await montarParticipantes({ faixa: grupo, turno });
         const marcacoes = marcacoesIniciais(participantes, mes, ano);
         for (const b of alunos) {
           if (!marcacoes[b.id]) marcacoes[b.id] = {};
           marcacoes[b.id][dia] = statusParaPresenca[statusDe(b.id)];
         }
         await salvarLista({
-          mes, ano, turma_id: turmaId, turma: turma.nome,
-          educador: educador || null, filtros: { turmaId, origem: "app-chamada" },
+          mes, ano, turma_id: null, turma: GRUPOS[grupo].nome, turno,
+          educador: educador || null, filtros: { faixa: grupo, turno, origem: "app-chamada" },
           participantes, marcacoes, total_alunos: participantes.length,
           autor: educador || "Educador",
         });
       }
 
-      await registrarHistorico({
-        entidade: "frequencia", entidade_id: aulaId, acao: "registrou",
-        descricao: `Chamada pelo app em ${turma.nome} (${data}) — ${presentes}/${alunos.length} presentes`,
-        autor: educador || "Educador",
-      });
       await registrarLogPresenca({
         acao: "chamada_app",
-        descricao: `Chamada rápida (${GRUPOS[grupo!].nome}) em ${turma.nome} — ${presentes}/${alunos.length} presentes em ${data}.`,
+        descricao: `Chamada rápida ${titulo} — ${presentes}/${alunos.length} presentes em ${data}.`,
         autor: educador || "Educador",
       });
     },
     onSuccess: () => {
       toast.success("Chamada salva! Já está na lista de presença.");
-      qc.invalidateQueries({ queryKey: ["atividades-dashboard"] });
+      qc.invalidateQueries();
       setMarcas({});
       setSalvo(true);
     },
@@ -167,7 +138,7 @@ function ChamadaApp() {
 
   const voltar = () => {
     if (salvo) { setSalvo(false); setMarcas({}); return; }
-    if (turmaId) { setTurmaId(""); setMarcas({}); return; }
+    if (turno) { setTurno(""); setMarcas({}); return; }
     setGrupo(null);
   };
 
@@ -194,10 +165,7 @@ function ChamadaApp() {
             <h1 className="text-xl font-display font-bold">Qual grupo você vai chamar?</h1>
             {(["crescer", "jovem"] as GrupoKey[]).map((k) => {
               const g = GRUPOS[k];
-              const qtd = turmas.filter((t: any) => {
-                const of = oficinaMap.get(t.oficina_id);
-                return of?.grupo === k || of?.grupo === "ambos";
-              }).length;
+              const qtd = doGrupo(k).length;
               return (
                 <button key={k} onClick={() => setGrupo(k)}
                   className="w-full text-left rounded-3xl border-2 border-slate-200 bg-white p-5 flex items-center gap-4 active:scale-[0.98] transition-all shadow-sm">
@@ -212,8 +180,8 @@ function ChamadaApp() {
           </div>
         )}
 
-        {/* Passo 2: turma + data */}
-        {grupo && !turmaId && !salvo && (
+        {/* Passo 2: turno + data */}
+        {grupo && !turno && !salvo && (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
             <h1 className="text-xl font-display font-bold">{GRUPOS[grupo].icone} {GRUPOS[grupo].nome}</h1>
             <div>
@@ -225,22 +193,16 @@ function ChamadaApp() {
               <Input value={educador} onChange={(e) => setEducador(e.target.value)} placeholder="Ex.: Renata" className="mt-1 h-12 text-base bg-white" />
             </div>
             <div className="space-y-2 pt-2">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Escolha a turma</p>
-              {turmasDoGrupo.length === 0 && (
-                <p className="text-sm text-slate-500 bg-white rounded-2xl p-4 border border-dashed">Nenhuma turma deste grupo cadastrada ainda.</p>
-              )}
-              {turmasDoGrupo.map((t: any) => (
-                <button key={t.id} onClick={() => setTurmaId(t.id)}
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Escolha o turno</p>
+              {TURNOS_APP.map((t) => (
+                <button key={t.value} onClick={() => setTurno(t.value)}
                   className="w-full text-left rounded-2xl border-2 border-slate-200 bg-white p-4 flex items-center gap-3 active:scale-[0.98] transition-all">
-                  <div className="size-10 rounded-xl bg-[#063b38] text-white grid place-items-center shrink-0">
-                    <Users className="size-5" />
-                  </div>
+                  <span className="text-3xl">{t.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold truncate">{t.nome}</p>
-                    <p className="text-xs text-slate-500 truncate">
-                      {oficinaMap.get(t.oficina_id)?.nome}{t.horario_inicio ? ` · ${t.horario_inicio}` : ""}
-                    </p>
+                    <p className="font-semibold">{t.value}</p>
+                    <p className="text-xs text-slate-500">{doGrupo(grupo, t.value).length} aluno(s)</p>
                   </div>
+                  <Users className="size-5 text-slate-400" />
                 </button>
               ))}
             </div>
@@ -248,11 +210,11 @@ function ChamadaApp() {
         )}
 
         {/* Passo 3: chamada */}
-        {grupo && turmaId && !salvo && (
+        {grupo && turno && !salvo && (
           <div className="animate-in fade-in slide-in-from-bottom-2">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h1 className="text-lg font-display font-bold leading-tight">{turma?.nome}</h1>
+                <h1 className="text-lg font-display font-bold leading-tight">{titulo}</h1>
                 <p className="text-xs text-slate-500">{new Date(data + "T12:00:00").toLocaleDateString("pt-BR")} · {presentes}/{alunos.length} presentes</p>
               </div>
               <button onClick={() => {
@@ -317,7 +279,7 @@ function ChamadaApp() {
             </div>
             <h1 className="text-2xl font-display font-bold">Chamada salva!</h1>
             <p className="text-sm text-slate-500 mt-2">
-              {presentes} de {alunos.length} presentes em {turma?.nome}.<br />
+              {presentes} de {alunos.length} presentes em {titulo}.<br />
               A lista de presença do mês já foi atualizada.
             </p>
             <Button onClick={voltar} className="mt-6 bg-[#063b38] hover:bg-[#0a4f4a] h-12 px-8 rounded-2xl">
@@ -328,7 +290,7 @@ function ChamadaApp() {
       </main>
 
       {/* Botão fixo de salvar */}
-      {grupo && turmaId && !salvo && alunos.length > 0 && (
+      {grupo && turno && !salvo && alunos.length > 0 && (
         <div className="fixed bottom-0 inset-x-0 p-4 bg-gradient-to-t from-[#063b38] via-[#063b38]/95 to-transparent">
           <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}
             className="w-full h-14 rounded-2xl bg-amber-400 hover:bg-amber-300 text-[#063b38] font-bold text-base shadow-xl">
